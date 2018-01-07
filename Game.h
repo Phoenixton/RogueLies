@@ -16,12 +16,17 @@ public:
 
 
   //functions
+  void drawAnOrder();
+  void changeLevel(char, WINDOW* infos);
+  void putCharacterOnStairs(char stairs);
   void startMenu(WINDOW* initscreen);
+  int chooseClass(WINDOW* initscreen);
   //void init(WINDOW* map, WINDOW* infos);
   void inGameMenu();
-  void inputName(WINDOW* initscreen);
+  void inputName(WINDOW* initscreen, int);
   void printMap(WINDOW* map);
   void printInformations(WINDOW* infos);
+  void printCharacterStats(WINDOW* cs);
   void displayUserName(WINDOW* infos);
   void printCharacter();
   bool waitForInput(WINDOW* infos, WINDOW* map);
@@ -45,6 +50,7 @@ private:
   bool isPlaying;
   int currentState;
   int currentLevel;
+  std::vector<Map> mapArray;
   Map currentMap;
   Player player;
 

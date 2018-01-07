@@ -9,12 +9,24 @@ int main()
   cbreak();
   noecho();
 
+  if(has_colors() == FALSE)
+	{	endwin();
+		printf("Your terminal does not support color\n");
+		exit(1);
+	}
+	start_color();			/* Start color 			*/
+
+  int parent_x, parent_y, new_x, new_y;
+  int score_size = 3;
+
   WINDOW* map = newwin(20,70,0,0);
   WINDOW* infos = newwin(5,70,20,0);
-  WINDOW* characterStats = newwin(5, 18, 0, 70);
+  WINDOW* characterStats = newwin(25,18,0,70);
+
   keypad(map, TRUE);
   keypad(infos, TRUE);
   keypad(characterStats, TRUE);
+
   refresh();
 
   Game game;
@@ -40,14 +52,15 @@ int main()
     game.updateVision();
     game.printMap(map);
     game.printInformations(infos);
+    game.printCharacterStats(characterStats);
     werase(map);
+
 
     box(map,0,0);
     box(infos,0,0);
     wmove(map, 1,1);
     wmove(infos, 1,1);
     while(!game.waitForInput(infos, map)) {
-
     }
     wclrtoeol(infos);
   }

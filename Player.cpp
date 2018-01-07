@@ -9,12 +9,15 @@ Player::Player() {
   name = (char*)"";
   currentPos = Position(3,3);
   status = playerVisionUp;
+  level = 0;
+  this->inventory = new Inventory();
 
 }
 
 //regular Constructor for player
 Player::Player(char* name) {
-  this -> name = name;
+  this->name = name;
+
 }
 
 //TODO: Constructor for save Character ?
@@ -26,6 +29,33 @@ Player::~Player() {
 
   std::cout << "Player " << this->name << " destroyed" << std::endl;
 
+}
+
+void Player::setClassChoices(int classChoice) {
+  if(classChoice == '1') {
+    this->charClass = rogue;
+    this->health = baseHealthRogue;
+    this->attack = baseAttackRogue;
+    this->defense = baseDefenseRogue;
+    this->vision = baseVisionRogue;
+  } else if(classChoice == '2') {
+    this->charClass = warrior;
+    this->health = baseHealthWarrior;
+    this->attack = baseAttackWarrior;
+    this->defense = baseDefenseWarrior;
+    this->vision = baseVisionWarrior;
+  } else if(classChoice == '3') {
+    this->charClass = mage;
+    this->health = baseHealthMage;
+    this->attack = baseAttackMage;
+    this->defense = baseDefenseMage;
+    this->vision = baseVisionMage;
+  }
+}
+
+void Player::takeHit(int value) {
+  int currentHealth = this->health;
+  this->health = currentHealth - value;
 }
 
 void Player::lookEast(WINDOW* infos) {
@@ -170,6 +200,10 @@ bool Player::moveSW(Tile south, Tile west, Tile sw, WINDOW* infos) {
 
   }
 
+}
+
+void Player::useItem(Item i) {
+  i.useItemOnPlayer(this);
 }
 
 

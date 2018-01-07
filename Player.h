@@ -5,8 +5,11 @@
 #include <string>
 #include "Position.h"
 #include "Tile.h"
+#include "Item.h"
+#include "Inventory.h"
 
 class Player {
+
 
 public:
 
@@ -20,7 +23,9 @@ public:
 
   //functions
   void toString();
+  void setClassChoices(int);
   void drawPlayer(WINDOW* map);
+  void takeHit(int);
   bool moveUp(Tile, WINDOW* infos);
   bool moveLeft(Tile, WINDOW* infos);
   bool moveDown(Tile, WINDOW* infos);
@@ -34,21 +39,53 @@ public:
   void lookNorth(WINDOW* infos);
   void lookSouth(WINDOW* infos);
 
+  void useItem(Item);
+
   //getters
   char* getName() {
-    return name;
+    return this->name;
   }
+
   Position getCurrentPos() {
     return currentPos;
   }
+
+  int getHealth() {
+    return health;
+  }
+
+  int getAttack() {
+    return attack;
+  }
+
   char getStatus() {
     return this->status;
+  }
+
+  int getDefense() {
+    return defense;
+  }
+
+  int getVision() {
+    return vision;
+  }
+
+  int getLevel() {
+    return this->level;
+  }
+
+  Inventory* getInventory() {
+    return this->inventory;
+  }
+
+  void setLevel(int i) {
+    this->level = i;
   }
   //setters
   bool setName(char* s) {
     //TODO: checks that the user input actually is a reasonable name ?
     if(true) {
-      name = s;
+      this->name = s;
       return true;
     } else {
 
@@ -59,11 +96,34 @@ public:
     this->currentPos = p;
   }
 
+  void setAttack(int a) {
+    this->attack = a;
+  }
+
+  void setDefense(int d) {
+    this->defense = d;
+  }
+
+  void setHealth(int h) {
+    this->health = h;
+  }
+
+  void setVision(int v) {
+    this->vision = v;
+  }
+
 //variables
 private:
   char* name;
   Position currentPos;
   char status;
+  std::string charClass;
+  int attack;
+  int defense;
+  int vision;
+  int health;
+  int level;
+  Inventory* inventory;
 
 };
 

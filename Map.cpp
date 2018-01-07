@@ -33,3 +33,7 @@ Map::Map(std::string mapName){
 Tile Map::charAt(Position p) {
   return this->charMap.at(p.getX()).at(p.getY());
 }
+
+void Map::setTileDiscovered(Position p, bool value) {
+  this->charMap.at(p.getX()).at(p.getY()).setHasBeenDiscovered(value);
+}

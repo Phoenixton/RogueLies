@@ -18,6 +18,7 @@ public:
 
   //functions
   Tile charAt(Position p);
+  void setTileDiscovered(Position, bool);
 
   int getSize() {
     return this->charMap.size();

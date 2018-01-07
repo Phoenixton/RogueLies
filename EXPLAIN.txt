@@ -1,0 +1,77 @@
+Si c'est le premier niveau : stairsUp ne fait rien
+si c'est le dernier niveau : stairsDown déclenche là fin du jeu
+Si c'est la premiere fois que tu visites le niveau : pushback à la find
+Sinon, : on va chercher dans mapArray et on le met dedans
+
+checker l'index du niveau actuel dans levelsAvailables : match - begin()
+mapArray.size() : le nombre de niveaux uniques visités, dans l'idéal
+
+int index = match - begin();
+//Si up et c'est le first niveau
+if(stairs == stairsUp) {
+
+  if(index == 0) {
+    wprintw(infos, "You cannot go up, this is the first level");
+    wrefresh(infos);
+
+    //on veut monter
+  } else {
+    mapArray.at(index) = currentMap;
+    currentLevel = availableLevels.at(index - 1);
+    std::string level = std::to_string(this->currentLevel);
+    currentMap = mapArray.at(index - 1);
+  }
+} else if (stairs == stairsDown) {
+
+  //Si c'est le dernier tableau
+  if(index == mapArray.size() - 1) {
+
+    wprintw(infos, "You've beaten the game !");
+    wrefresh(infos);
+  } else {
+    //Si c'est la premiere fois qu'on voit ce niveau
+    if(mapArray.size() > index) {
+      mapArray.at(index) = currentMap;
+      currentLevel = availableLevels.at(index + 1);
+      std::string level = std::to_string(this->currentLevel);
+      currentMap = mapArray.at(index + 1);
+
+    } else {
+      mapArray.push_back(currentMap);
+      currentLevel = availableLevels.at(index + 1);
+      std::string level = std::to_string(this->currentLevel);
+      currentMap = Map("map" + level +".txt");
+    }
+  }
+}
+
+
+
+
+  //resize
+  getmaxyx(stdscr, new_y, new_x);
+  if (new_y != parent_y || new_x != parent_x) {
+    parent_x = new_x;
+    parent_y = new_y;
+    wresize(map, new_y - score_size, new_x);
+    wresize(infos, score_size, new_x);
+    mvwin(infos, new_y - score_size, 0);
+    wclear(stdscr);
+    wclear(map);
+    wclear(infos);
+
+    box(map,0,0);
+    box(infos,0,0);
+    box(characterStats, 0,0);
+
+
+  }
+
+
+
+
+  TODO: - Enemy
+        - Items
+        - Fights
+        - TRAPS
+        - inventory
