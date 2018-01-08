@@ -7,6 +7,7 @@
 #include "Tile.h"
 #include "Item.h"
 #include "Inventory.h"
+#include "Equipable.h"
 
 class Player {
 
@@ -39,10 +40,18 @@ public:
   void lookNorth(WINDOW* infos);
   void lookSouth(WINDOW* infos);
 
-  void useItem(Item);
+  bool hasAKey();
+  bool useAKey();
 
+  void useItem(Item);
+  void equipItem(Equipable);
+
+  int calculateMaxHealth();
+  int calculateCurrentAttack();
+  int calculateCurrentDefense();
+  int calculateCurrentAccuracy();
   //getters
-  char* getName() {
+  std::string getName() {
     return this->name;
   }
 
@@ -72,6 +81,14 @@ public:
 
   int getLevel() {
     return this->level;
+  }
+
+  int getMaxHealth() {
+    return this->maxHealth;
+  }
+
+  int getXpPoints() {
+    return this->xpPoints;
   }
 
   Inventory* getInventory() {
@@ -112,9 +129,17 @@ public:
     this->vision = v;
   }
 
+  void setMaxHealth(int m) {
+    this->maxHealth = m;
+  }
+
+  void setXpPoints(int x) {
+    this->xpPoints = x;
+  }
+
 //variables
 private:
-  char* name;
+  std::string name;
   Position currentPos;
   char status;
   std::string charClass;
@@ -122,9 +147,21 @@ private:
   int defense;
   int vision;
   int health;
+  int maxHealth;
+  int accuracy;
+  int xpPoints;
   int level;
   Inventory* inventory;
-
+  Item head;
+  Item torso;
+  Item leftHand;
+  Item rightHand;
+  Item feet;
+  bool hasHeadGear;
+  bool hasTorsoGear;
+  bool hasLeftHandGear;
+  bool hasRightHandGear;
+  bool hasFeetGear;
 };
 
 #endif //PLAYER_H

@@ -20,3 +20,7 @@ bool Position::compare(Position p) {
 void Position::toString(WINDOW* infos) {
   wprintw(infos, "The position is (%i, %i)", this->x, this->y);
 }
+
+void Position::debug() {
+  printf("Whatever %i, %i \n", this->x, this->y);
+}

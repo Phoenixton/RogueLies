@@ -2,6 +2,8 @@
 #define ITEM_H
 
 #include <string>
+#include <ncurses.h>
+
 class Player;
 
 class Item {
@@ -39,7 +41,23 @@ public:
     return this->id;
   }
 
+  bool getIsEquipable() {
+    return this->isEquipable;
+  }
+
+  bool getIsConsumable() {
+    return this->isConsumable;
+  }
+
+  bool getIsKey() {
+    return this->isKey;
+  }
+
+  bool equipItemOnPlayer(Player* p);
   bool useItemOnPlayer(Player* p);
+  void drawOptions(WINDOW*);
+  char getSymbol();
+
 
 protected:
   std::string name;
@@ -50,6 +68,9 @@ protected:
   int accuracyAdded;
   int visionAdded;
   int id;
+  bool isEquipable;
+  bool isConsumable;
+  bool isKey;
 
 };
 

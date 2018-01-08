@@ -2,9 +2,13 @@
 #define GAME_H
 
 #include<ncurses.h>
+#include <vector>
+#include <tuple>
 
 #include "Player.h"
+#include "Chest.h"
 #include "Map.h"
+
 
 class Game {
 
@@ -17,6 +21,11 @@ public:
 
   //functions
   void drawAnOrder();
+  std::vector<std::tuple<Chest, Position>> createItemsForMap();
+  bool isChestOnPosition(Position p);
+  std::vector<Position> getFreePositions(int numberPositionsNeeded);
+  bool positionNotAlreadyTaken(Position p, std::vector<Position> v);
+  char getSymbolOfChestOnPosition(Position p);
   void changeLevel(char, WINDOW* infos);
   void putCharacterOnStairs(char stairs);
   void startMenu(WINDOW* initscreen);
@@ -53,7 +62,8 @@ private:
   std::vector<Map> mapArray;
   Map currentMap;
   Player player;
-
+  std::vector<std::vector<std::tuple<Chest, Position>>> itemsOnMaps;
+  std::vector<std::tuple<Chest, Position>> itemsOnCurrentMap;
 };
 
 #endif //GAME_H

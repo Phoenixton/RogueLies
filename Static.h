@@ -14,6 +14,13 @@
   static char hasNotBeenDiscovered = '*';
   static char troll = 'k';
   static char chicken = 'c';
+  static char unlockedChest = '$';
+  static char lockedChest = '@';
+
+
+  static int maxItemsOnMap = 3;
+  static int minItemsOnMap = 1;
+  static int totalObjectsAvailable = 2;
 
 
   static std::vector<int> availableLevels {1, 2, 3};
@@ -42,5 +49,12 @@
   static int baseDefenseWarrior = 10;
   static int baseDefenseMage = 5;
 
+  static int maxHealthWarrior = 20;
+  static int maxHealthRogue = 10;
+  static int maxHealthMage = 15;
+
+  static int baseAccuracyRogue = 95;
+  static int baseAccuracyWarrior = 90;
+  static int baseAccuracyMage = 80;
 
 #endif

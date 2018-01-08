@@ -12,6 +12,7 @@ public:
   //functions
   bool compare(Position);
   void toString(WINDOW* infos);
+  void debug();
 
   //getters
   int getX() {

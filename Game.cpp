@@ -3,12 +3,14 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <ctime>
 
 #include<ncurses.h>
 #include "Game.h"
 #include "Static.h"
 #include "Item.h"
 #include "Food.h"
+#include "Key.h"
 
 Game::Game() {
 
@@ -17,11 +19,12 @@ Game::Game() {
   currentLevel = availableLevels.at(0);
   drawAnOrder();
   currentLevel = availableLevels.at(0);
-  std::string w = std::to_string(availableLevels.at(1));
-  std::cout << w << std::endl;
   std::string level = std::to_string(this->currentLevel);
-  currentMap = Map("map" + level +".txt");
-
+  currentMap = Map("map" + level + ".txt");
+  itemsOnCurrentMap = createItemsForMap();
+  //std::get<1>(itemsOnCurrentMap.at(0)).debug();
+  //places the character at start point
+  putCharacterOnStairs(stairsDown);
   //Player player;
 
 }
@@ -32,20 +35,71 @@ Game::~Game() {
 }
 
 void Game::drawAnOrder() {
+  std::srand(std::time(0));
   std::random_shuffle(availableLevels.begin(), availableLevels.end());
 }
 
+
+std::vector<std::tuple<Chest, Position>> Game::createItemsForMap() {
+  std::vector<std::tuple<Chest, Position>> toReturn;
+  std::srand(std::time(nullptr));
+  int randNum = rand()%(maxItemsOnMap-minItemsOnMap + 1) + minItemsOnMap;
+  std::vector<Position> positions = getFreePositions(randNum);
+  for(int i = 0; i < randNum; ++i) {
+    int r = rand()%(totalObjectsAvailable +1);
+
+    switch(r) {
+      case 0:
+        toReturn.push_back(std::make_tuple(Chest(Food()), positions.at(i)));
+        break;
+      case 1:
+        toReturn.push_back(std::make_tuple(Chest(Key()), positions.at(i)));
+        break;
+    }
+  }
+
+  return toReturn;
+}
+
+std::vector<Position> Game::getFreePositions(int numberPositionsNeeded) {
+  std::vector<Position> toReturn;
+  std::srand(std::time(nullptr));
+  int randX;
+  int randY;
+  for(int i = 0; i < numberPositionsNeeded; ++i) {
+    bool flag = true;
+    while(flag) {
+      randX = rand()%((this->currentMap.getSize() - 2));
+      randY = rand()%((this->currentMap.getCharMap()[randX].size() - 2));
+      if((this->currentMap.charAt(Position(randX, randY)).getSymbol() == ' ') && positionNotAlreadyTaken(Position(randX, randY), toReturn)) {
+
+        flag = false;
+      }
+
+    }
+    toReturn.push_back(Position(randX, randY));
+  }
+  return toReturn;
+
+
+}
+
+bool Game::positionNotAlreadyTaken(Position p, std::vector<Position> v) {
+
+  for(int j = 0; j < v.size(); ++j) {
+    if(v.at(j).compare(p)) {
+      return false;
+    }
+  }
+  return true;
+}
 
 void Game::changeLevel(char stairs, WINDOW* infos) {
   auto match = std::find(availableLevels.begin(), availableLevels.end(), currentLevel);
   int index = match - availableLevels.begin();
 
+  //TODO:proper inventory !!!!!!!!!!!!
   this->player.getInventory()->addItem(Food());
-std::cout<<"TEST"<<std::endl;
-  wprintw(infos, "ALbert %i", this->player.getInventory()->getItems().size());
-  WINDOW* inventory = newwin(5,70,10,0);
-  this->player.getInventory()->displayInventory(inventory);
-  this->player.useItem(Food());
   //Si up et c'est le first niveau
   if(stairs == stairsUp) {
 
@@ -53,17 +107,16 @@ std::cout<<"TEST"<<std::endl;
     if(index != 0) {
     //si on l'a déjà parcouru
       if(mapArray.size() > index)  {
-        std::cout<<"HEY"<<std::endl;
-        std::cout<<mapArray.size()<<std::endl;
         mapArray.at(index) = currentMap;
+        itemsOnMaps.at(index) = itemsOnCurrentMap;
       } else {
-        std::cout<<"IJUST"<<std::endl;
-        std::cout<<mapArray.size()<<std::endl;
         mapArray.push_back(currentMap);
+        itemsOnMaps.push_back(itemsOnCurrentMap);
       }
       currentLevel = availableLevels.at(index - 1);
       std::string level = std::to_string(this->currentLevel);
       currentMap = mapArray.at(index - 1);
+      itemsOnCurrentMap = itemsOnMaps.at(index - 1);
 
       putCharacterOnStairs(stairs);
     } else {
@@ -74,29 +127,28 @@ std::cout<<"TEST"<<std::endl;
 
     //Si c'est le dernier tableau
     if(index == (availableLevels.size() -1)) {
-      std::cout<<mapArray.size()<<std::endl;
       wprintw(infos, "You've beaten the game !");
       wrefresh(infos);
     } else {
-      //Si on a pas encore enregistre le niveau
       if(mapArray.size() > index) {
         mapArray.at(index) = currentMap;
-          std::cout<<"METYOU"<<std::endl;
-          std::cout<<mapArray.size()<<std::endl;
+        itemsOnMaps.at(index) = itemsOnCurrentMap;
         currentLevel = availableLevels.at(index + 1);
         std::string level = std::to_string(this->currentLevel);
         if(mapArray.size() > index+1) {
           currentMap = mapArray.at(index + 1);
+          itemsOnCurrentMap = itemsOnMaps.at(index + 1);
         } else {
           currentMap = Map("map" + level + ".txt");
+          itemsOnCurrentMap = createItemsForMap();
         }
       } else {
-        std::cout<<"ANDTHISIS"<<std::endl;
-        std::cout<<index<<std::endl;
         mapArray.push_back(currentMap);
+        itemsOnMaps.push_back(itemsOnCurrentMap);
         currentLevel = availableLevels.at(index + 1);
         std::string level = std::to_string(this->currentLevel);
         currentMap = Map("map" + level +".txt");
+        itemsOnCurrentMap = createItemsForMap();
       }
 
       putCharacterOnStairs(stairs);
@@ -189,7 +241,7 @@ int Game::chooseClass(WINDOW* initscr) {
 
 
 void Game::displayUserName(WINDOW* infos) {
-  wprintw(infos, "Your user name is %s", this->player.getName());
+  wprintw(infos, "Your user name is %s", this->player.getName().data());
   wrefresh(infos);
   getch();
 }
@@ -203,11 +255,19 @@ void Game::printMap(WINDOW* map) {
         if(this->player.getCurrentPos().compare(Position(i,j))) {
             this->player.drawPlayer(map);
         } else {
+
+
             Tile temp = currentMap.charAt(Position(i, j));
             if(temp.getHasBeenDiscovered()) {
+              if(isChestOnPosition(Position(i, j))) {
 
-              waddch(map, temp.getSymbol());
+                waddch(map, getSymbolOfChestOnPosition(Position(i, j)));
 
+              } else {
+                waddch(map, temp.getSymbol());
+
+
+              }
             } else {
               waddch(map, hasNotBeenDiscovered);
             }
@@ -225,6 +285,23 @@ void Game::printMap(WINDOW* map) {
   	attroff(COLOR_PAIR(1));
 }
 
+bool Game::isChestOnPosition(Position p) {
+  for(int i = 0; i < this->itemsOnCurrentMap.size(); ++i) {
+    if(std::get<1>(this->itemsOnCurrentMap.at(i)).compare(p)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+char Game::getSymbolOfChestOnPosition(Position p) {
+  for(int i = 0; i < this->itemsOnCurrentMap.size(); ++i) {
+    if(std::get<1>(this->itemsOnCurrentMap.at(i)).compare(p)) {
+      return std::get<0>(this->itemsOnCurrentMap.at(i)).getSymbol();
+    }
+  }
+}
+
 void Game::printInformations(WINDOW* infos) {
   wmove(infos, 1,1);
   this->player.getCurrentPos().toString(infos);
@@ -235,56 +312,64 @@ void Game::printInformations(WINDOW* infos) {
 void Game::printCharacterStats(WINDOW* charStats) {
   wmove(charStats, 1,1);
   //this->player.takeHit(3);
-  //wprintw(charStats, "User name %s", this->player.getName());
+  wprintw(charStats, "%s", this->player.getName().data());
   wmove(charStats, 2, 1);
-  wprintw(charStats, "Health : %i / 20", this->player.getHealth());
+  wprintw(charStats, "Health : %i / %i", this->player.getHealth(), this->player.calculateMaxHealth());
   wmove(charStats, 3, 1);
-  wprintw(charStats, "Attack : %i / 20", this->player.getAttack());
+  wprintw(charStats, "Attack : %i", this->player.calculateCurrentAttack());
   wmove(charStats, 4, 1);
-  wprintw(charStats, "Defense : %i / 20", this->player.getDefense());
+  wprintw(charStats, "Defense : %i", this->player.calculateCurrentDefense());
   wmove(charStats, 5, 1);
-  wprintw(charStats, "Vision : %i / 20", this->player.getVision());
+  wprintw(charStats, "Accuracy : %i", this->player.calculateCurrentAccuracy());
   wmove(charStats, 6, 1);
   wprintw(charStats, "Level : %i", this->player.getLevel());
+  wmove(charStats, 7, 1);
+  wprintw(charStats, "XP Points : %i", this->player.getXpPoints());
+
+  wmove(charStats, 8, 1);
+  wprintw(charStats, "Floor Items : %i", this->itemsOnCurrentMap.size());
   wrefresh(charStats);
 }
 
 bool Game::waitForInput(WINDOW *infos, WINDOW* map) {
   int ch;
   ch = wgetch(infos);
-  char destination;
+  Position destination;
   bool flag = false;
 
   switch(ch) {
+    case 'i':
+      flag = (this->player.getInventory()->displayInventory(&this->player));
+      break;
     case 'z':
-      destination = currentMap.charAt(Position(this->player.getCurrentPos().getX()-1,
-                              this->player.getCurrentPos().getY())).getSymbol();
+      destination = Position(this->player.getCurrentPos().getX()-1,
+                              this->player.getCurrentPos().getY());
       flag = this->player.moveUp(currentMap.charAt(Position(this->player.getCurrentPos().getX()-1,
                               this->player.getCurrentPos().getY())), infos);
       break;
     case 'q':
-      destination = currentMap.charAt(Position(this->player.getCurrentPos().getX(),
-                              this->player.getCurrentPos().getY()-1)).getSymbol();
+      destination = Position(this->player.getCurrentPos().getX(),
+                              this->player.getCurrentPos().getY()-1);
       flag = this->player.moveLeft(currentMap.charAt(Position(this->player.getCurrentPos().getX(),
                               this->player.getCurrentPos().getY()-1)), infos);
       break;
 
     case 's':
-      destination =currentMap.charAt(Position(this->player.getCurrentPos().getX()+1,
-                                this->player.getCurrentPos().getY())).getSymbol();
+      destination = Position(this->player.getCurrentPos().getX()+1,
+                                this->player.getCurrentPos().getY());
       flag = this->player.moveDown(currentMap.charAt(Position(this->player.getCurrentPos().getX()+1,
                                 this->player.getCurrentPos().getY())), infos);
       break;
 
     case 'd':
-      destination = currentMap.charAt(Position(this->player.getCurrentPos().getX(),
-                                this->player.getCurrentPos().getY()+1)).getSymbol();
+      destination = Position(this->player.getCurrentPos().getX(),
+                                this->player.getCurrentPos().getY()+1);
       flag = this->player.moveRight(currentMap.charAt(Position(this->player.getCurrentPos().getX(),
                                 this->player.getCurrentPos().getY()+1)), infos);
       break;
     case 'a':
-      destination = currentMap.charAt(Position(this->player.getCurrentPos().getX()-1,
-                                this->player.getCurrentPos().getY()-1)).getSymbol();
+      destination = Position(this->player.getCurrentPos().getX()-1,
+                                this->player.getCurrentPos().getY()-1);
       flag = this->player.moveNW(currentMap.charAt(Position(this->player.getCurrentPos().getX() -1,
                                                             this->player.getCurrentPos().getY())),
                       currentMap.charAt(Position(this->player.getCurrentPos().getX(),
@@ -293,8 +378,8 @@ bool Game::waitForInput(WINDOW *infos, WINDOW* map) {
                                                 this->player.getCurrentPos().getY()-1)), infos);
       break;
     case 'e':
-      destination = currentMap.charAt(Position(this->player.getCurrentPos().getX()-1,
-                      this->player.getCurrentPos().getY()+1)).getSymbol();
+      destination = Position(this->player.getCurrentPos().getX()-1,
+                      this->player.getCurrentPos().getY()+1);
       flag = this->player.moveNE(currentMap.charAt(Position(this->player.getCurrentPos().getX() -1,
                                                           this->player.getCurrentPos().getY())),
                               currentMap.charAt(Position(this->player.getCurrentPos().getX(),
@@ -303,8 +388,8 @@ bool Game::waitForInput(WINDOW *infos, WINDOW* map) {
                                               this->player.getCurrentPos().getY()+1)),infos);
       break;
     case 'w':
-      destination = currentMap.charAt(Position(this->player.getCurrentPos().getX()+1,
-                                this->player.getCurrentPos().getY()-1)).getSymbol();
+      destination = Position(this->player.getCurrentPos().getX()+1,
+                                this->player.getCurrentPos().getY()-1);
       flag = this->player.moveSW(currentMap.charAt(Position(this->player.getCurrentPos().getX() +1,
                                                           this->player.getCurrentPos().getY())),
                     currentMap.charAt(Position(this->player.getCurrentPos().getX(),
@@ -313,8 +398,8 @@ bool Game::waitForInput(WINDOW *infos, WINDOW* map) {
                                               this->player.getCurrentPos().getY()-1)), infos);
       break;
     case 'c':
-      destination = currentMap.charAt(Position(this->player.getCurrentPos().getX()+1,
-                                this->player.getCurrentPos().getY()+1)).getSymbol();
+      destination = Position(this->player.getCurrentPos().getX()+1,
+                                this->player.getCurrentPos().getY()+1);
       flag = this->player.moveSE(currentMap.charAt(Position(this->player.getCurrentPos().getX()+1,
                                                           this->player.getCurrentPos().getY())),
                     currentMap.charAt(Position(this->player.getCurrentPos().getX(),
@@ -341,9 +426,38 @@ bool Game::waitForInput(WINDOW *infos, WINDOW* map) {
 
   }
 
-  if(destination == stairsUp || destination == stairsDown) {
-    changeLevel(destination, infos);
+  if(currentMap.charAt(destination).getSymbol() == stairsUp || currentMap.charAt(destination).getSymbol() == stairsDown) {
+    changeLevel(currentMap.charAt(destination).getSymbol(), infos);
+  } else if(isChestOnPosition(destination)) {
+    if(getSymbolOfChestOnPosition(destination) == lockedChest) {
+
+      if(this->player.hasAKey()) {
+        this->player.useAKey();
+        for(int i = 0; i < this->itemsOnCurrentMap.size(); ++i) {
+          if(destination.compare(std::get<1>(this->itemsOnCurrentMap.at(i)))) {
+            this->player.getInventory()->addItem(std::get<0>(this->itemsOnCurrentMap.at(i)).getItemInside());
+            wprintw(infos, "You unlocked the chest with one of your keys and found %s ! \n", std::get<0>(this->itemsOnCurrentMap.at(i)).getItemInside().getName().data());
+            wrefresh(infos);
+            this->itemsOnCurrentMap.erase(this->itemsOnCurrentMap.begin() + i);
+          }
+        }
+      } else {
+        wprintw(infos, "You don\'t have a key for this chest, what\'s the point ?\n");
+        wrefresh(infos);
+      }
+
+    } else if(getSymbolOfChestOnPosition(destination) == unlockedChest) {
+      for(int i = 0; i < this->itemsOnCurrentMap.size(); ++i) {
+        if(std::get<1>(this->itemsOnCurrentMap.at(i)).compare(destination)) {
+          this->player.getInventory()->addItem(std::get<0>(this->itemsOnCurrentMap.at(i)).getItemInside());
+          wprintw(infos, "You opened the unlocked chest with one of your keys and found %s ! \n", std::get<0>(this->itemsOnCurrentMap.at(i)).getItemInside().getName().data());
+          wrefresh(infos);
+          this->itemsOnCurrentMap.erase(this->itemsOnCurrentMap.begin() + i);
+        }
+      }
+    }
   }
+
   return flag;
 }
 

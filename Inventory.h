@@ -11,8 +11,9 @@ public:
   Inventory();
 
   bool addItem(Item);
-  bool removeItem(Item);
-  void displayInventory(WINDOW* inv);
+  bool removeItem(int);
+  bool displayInventory(Player*);
+  void redrawInventory(WINDOW* w);
 
   std::vector<Item> getItems() {
     return items;
