@@ -94,7 +94,8 @@ void Player::drawPlayer(WINDOW* map) {
 }
 
 bool Player::hasAKey() {
-  for(int i = 0; i < this->inventory->getItems().size(); i++) {
+  for(int i = 0; i < this->inventory->getItems().size(); ++i) {
+
     if(this->inventory->getItems().at(i).getIsKey()) {
       return true;
     }
@@ -103,7 +104,7 @@ bool Player::hasAKey() {
 }
 
 bool Player::useAKey() {
-  for(int i = 0; i < this->inventory->getItems().size(); i++) {
+  for(int i = 0; i < this->inventory->getItems().size(); ++i) {
     if(this->inventory->getItems().at(i).getIsKey()) {
       this->inventory->removeItem(this->inventory->getItems().at(i).getID());
     }
@@ -237,7 +238,7 @@ void Player::useItem(Item i) {
   i.useItemOnPlayer(this);
 }
 
-void Player::equipItem(Equipable i) {
+void Player::equipItem(Item i) {
   int emplacement = i.getEmplacement();
   switch(emplacement) {
     case headID:

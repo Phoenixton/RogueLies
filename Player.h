@@ -7,7 +7,6 @@
 #include "Tile.h"
 #include "Item.h"
 #include "Inventory.h"
-#include "Equipable.h"
 
 class Player {
 
@@ -44,7 +43,7 @@ public:
   bool useAKey();
 
   void useItem(Item);
-  void equipItem(Equipable);
+  void equipItem(Item);
 
   int calculateMaxHealth();
   int calculateCurrentAttack();
@@ -135,6 +134,37 @@ public:
 
   void setXpPoints(int x) {
     this->xpPoints = x;
+  }
+  bool getHasHeadGear() {
+    return this->hasHeadGear;
+  }
+
+  bool getHasTorsoGear() {
+    return this->hasTorsoGear;
+  }
+
+  Item getHead() {
+    return this->head;
+  }
+
+  Item getTorso() {
+    return this->torso;
+  }
+
+  void setHead(Item i) {
+    this->head = i;
+  }
+
+  void setTorso(Item i) {
+    this->torso = i;
+  }
+
+  void setHasHeadGear(bool b) {
+    this->hasHeadGear = b;
+  }
+
+  void setHasTorsoGear(bool b) {
+    this->hasTorsoGear = b;
   }
 
 //variables

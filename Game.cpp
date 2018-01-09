@@ -11,7 +11,7 @@
 #include "Item.h"
 #include "Food.h"
 #include "Key.h"
-
+#include "Sword.h"
 Game::Game() {
 
   isPlaying = true;
@@ -50,7 +50,7 @@ std::vector<std::tuple<Chest, Position>> Game::createItemsForMap() {
 
     switch(r) {
       case 0:
-        toReturn.push_back(std::make_tuple(Chest(Food()), positions.at(i)));
+        toReturn.push_back(std::make_tuple(Chest(Sword()), positions.at(i)));
         break;
       case 1:
         toReturn.push_back(std::make_tuple(Chest(Key()), positions.at(i)));
@@ -99,7 +99,7 @@ void Game::changeLevel(char stairs, WINDOW* infos) {
   int index = match - availableLevels.begin();
 
   //TODO:proper inventory !!!!!!!!!!!!
-  this->player.getInventory()->addItem(Food());
+  this->player.getInventory()->addItem(Key());
   //Si up et c'est le first niveau
   if(stairs == stairsUp) {
 

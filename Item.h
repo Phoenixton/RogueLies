@@ -53,6 +53,10 @@ public:
     return this->isKey;
   }
 
+  int getEmplacement() {
+    return this->emplacement;
+  }
+
   bool equipItemOnPlayer(Player* p);
   bool useItemOnPlayer(Player* p);
   void drawOptions(WINDOW*);
@@ -68,6 +72,7 @@ protected:
   int accuracyAdded;
   int visionAdded;
   int id;
+  int emplacement;
   bool isEquipable;
   bool isConsumable;
   bool isKey;

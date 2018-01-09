@@ -1,5 +1,5 @@
-output: Main.o Game.o Player.o Map.o Position.o Tile.o Item.o Consumable.o Equipable.o Food.o Inventory.o Chest.o Key.o
-	g++ Main.o Game.o Player.o Map.o Position.o Tile.o Item.o Consumable.o Equipable.o Food.o Inventory.o Chest.o Key.o -o  output -lncurses
+output: Main.o Game.o Player.o Map.o Position.o Tile.o Item.o Consumable.o Equipable.o Food.o Inventory.o Chest.o Key.o Sword.o
+	g++ Main.o Game.o Player.o Map.o Position.o Tile.o Item.o Consumable.o Equipable.o Food.o Inventory.o Chest.o Key.o Sword.o -o  output -lncurses
 
 Main.o: Main.cpp
 	g++ -c Main.cpp
@@ -39,6 +39,9 @@ Chest.o: Chest.cpp Chest.h
 
 Key.o: Key.cpp Key.h
 	g++ -c Key.cpp
+
+Sword.o: Sword.cpp Sword.h
+	g++ -c Sword.cpp
 
 clean:
 	rm *.o output

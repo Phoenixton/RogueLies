@@ -57,7 +57,7 @@ bool Inventory::displayInventory(Player* player) {
         switch(choice) {
           case '0':
             if(this->items.at(digit).getIsEquipable()) {
-            //  this->items.at(digit).equipItemOnPlayer(player);
+              this->items.at(digit).equipItemOnPlayer(player);
               flag = true;
             } else if(this->items.at(digit).getIsConsumable()) {
               this->items.at(digit).useItemOnPlayer(player);

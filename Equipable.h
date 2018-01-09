@@ -5,14 +5,6 @@
 
 class Equipable : public Item {
 
-public:
-  int getEmplacement() {
-    return this->emplacement;
-  }
-
-private:
-  int emplacement;
-
 };
 
 
