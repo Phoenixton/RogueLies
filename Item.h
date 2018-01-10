@@ -9,6 +9,7 @@ class Player;
 class Item {
 
 public:
+
   static int itemCount;
   bool operator==(const Item &item) const {
         return item.id == id;
@@ -31,6 +32,10 @@ public:
   }
   int getAccuracyAdded() {
     return accuracyAdded;
+  }
+
+  int getDodgeAdded() {
+    return dodgeAdded;
   }
 
   void setID(int i) {
@@ -61,10 +66,18 @@ public:
     return this->emplacement;
   }
 
-  bool equipItemOnPlayer(Player* p);
-  bool useItemOnPlayer(Player* p);
-  void drawOptions(WINDOW*);
-  char getSymbol();
+  virtual bool equipItemOnPlayer(Player* p, WINDOW* infos) {
+
+  }
+  virtual bool useItemOnPlayer(Player* p, WINDOW* infos) {
+
+  }
+  virtual void drawOptions(WINDOW*) {
+
+  }
+  virtual char getSymbol() {
+
+  }
 
 
 protected:
@@ -74,6 +87,7 @@ protected:
   int healthAdded;
   int defenseAdded;
   int accuracyAdded;
+  int dodgeAdded;
   int visionAdded;
   int id;
   int emplacement;

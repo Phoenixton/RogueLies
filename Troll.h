@@ -16,6 +16,9 @@ public:
     this->attack = troll_attack;
     this->defense = troll_defense;
     this->health = troll_health;
+    this->accuracy = troll_accuracy;
+    this->dodge = troll_dodge;
+    this->xp = troll_xp;
     this->position = p;
     this->feels = troll_feels;
     this->id = enemyCount;
@@ -31,7 +34,9 @@ public:
       //deplacement vertical bas
       case 1:
        if((currentMap->charAt(Position(this->position.getX() + 1, this->position.getY())).getSymbol() != wall)
-         && (!this->enemyOnTheTile(Position(this->position.getX() + 1, this->position.getY()), enemiesOnCurrentMap))) {
+         && (!this->enemyOnTheTile(Position(this->position.getX() + 1, this->position.getY()), enemiesOnCurrentMap))
+         && (!(p->getCurrentPos().compare(Position(this->position.getX() + 1, this->position.getY()))))
+       ) {
             nextPos = Position(this->position.getX() + 1, this->position.getY());
         } else {
           nextPos = this->position;
@@ -40,7 +45,9 @@ public:
       //deplacement vertical haut
       case 2:
        if((currentMap->charAt(Position(this->position.getX() - 1, this->position.getY())).getSymbol() != wall)
-         && (!this->enemyOnTheTile(Position(this->position.getX() - 1, this->position.getY()), enemiesOnCurrentMap))) {
+         && (!this->enemyOnTheTile(Position(this->position.getX() - 1, this->position.getY()), enemiesOnCurrentMap))
+         && (!(p->getCurrentPos().compare(Position(this->position.getX() - 1, this->position.getY()))))
+       ) {
             nextPos = Position(this->position.getX() -1, this->position.getY());
         } else {
           nextPos = this->position;
@@ -49,7 +56,9 @@ public:
         //deplacement horizontal droit
       case 3:
        if((currentMap->charAt(Position(this->position.getX(), this->position.getY() + 1)).getSymbol() != wall)
-         && (!this->enemyOnTheTile(Position(this->position.getX(), this->position.getY() + 1), enemiesOnCurrentMap))) {
+         && (!this->enemyOnTheTile(Position(this->position.getX(), this->position.getY() + 1), enemiesOnCurrentMap))
+         && (!(p->getCurrentPos().compare(Position(this->position.getX(), this->position.getY()+1))))
+       ) {
             nextPos = Position(this->position.getX(), this->position.getY() + 1);
         } else {
           nextPos = this->position;
@@ -58,7 +67,9 @@ public:
         //deplacement horizontal gauche
       case 4:
        if((currentMap->charAt(Position(this->position.getX(), this->position.getY() - 1)).getSymbol() != wall)
-         && (!this->enemyOnTheTile(Position(this->position.getX(), this->position.getY() - 1), enemiesOnCurrentMap))) {
+         && (!this->enemyOnTheTile(Position(this->position.getX(), this->position.getY() - 1), enemiesOnCurrentMap))
+         && (!(p->getCurrentPos().compare(Position(this->position.getX(), this->position.getY()-1))))
+       ) {
             nextPos = Position(this->position.getX(), this->position.getY() - 1);
         } else {
           nextPos = this->position;
@@ -73,7 +84,7 @@ public:
   }
 
   /*
-  The troll can see everything around him, don't get too close !
+  The troll can see everything around him, don't get too close ! JK he is too nice to attack
   */
   bool playerIsInSight(int feels, Player *p) {
     for(int i = 1; i <= feels; ++i) {

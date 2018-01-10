@@ -10,6 +10,9 @@ public:
   Chest(Item* item);
   Chest(bool b, Item* item);
 
+  ~Chest() {
+    
+  }
   void openChest(Player* p);
   void unlockChest();
 

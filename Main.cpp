@@ -16,11 +16,16 @@ int main()
 	}
 	start_color();			/* Start color 			*/
 
+  int SCALE = 2;
 
+  WINDOW* map = newwin(20 * SCALE,70 * SCALE,0,0);
+  WINDOW* infos = newwin(5 * SCALE,70 * SCALE,20 * SCALE,0);
+  WINDOW* characterStats = newwin(25 * SCALE,18* SCALE ,0,70 *SCALE);
+  /*
   WINDOW* map = newwin(20,70,0,0);
   WINDOW* infos = newwin(5,70,20,0);
   WINDOW* characterStats = newwin(25,18,0,70);
-
+  */
   keypad(map, TRUE);
   keypad(infos, TRUE);
   keypad(characterStats, TRUE);
@@ -47,7 +52,7 @@ int main()
   wrefresh(characterStats);
 
   while(game.getIsPlaying()) {
-    
+
     game.updateVision();
     game.printMap(map);
     game.printInformations(infos);
@@ -62,8 +67,25 @@ int main()
     wmove(infos, 1,1);
     while(!game.waitForInput(infos, map)) {
     }
-    wclrtoeol(infos);
+    wrefresh(infos);
     game.enemiesMoves(infos);
+    wrefresh(infos);
+    if(!game.checkIfPlayerIsAlive()) {
+      werase(map);
+      werase(characterStats);
+      wrefresh(map);
+      wprintw(map, "You died ! Haha !");
+      wrefresh(map);
+      getch();
+    } else if(game.getHasWon()) {
+      werase(map);
+      werase(characterStats);
+      wrefresh(map);
+      wprintw(map, "You just won, congrats !");
+      wrefresh(map);
+      getch();
+    }
+    game.checkPlayerLevel();
   }
 
   /*

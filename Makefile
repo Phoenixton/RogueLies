@@ -1,5 +1,5 @@
-output: Main.o Game.o Player.o Map.o Position.o Tile.o Item.o Consumable.o Equipable.o Food.o Inventory.o Chest.o Key.o Sword.o Enemy.o Dragon.o Troll.o Zombie.o Ghost.o
-	g++ Main.o Game.o Player.o Map.o Position.o Tile.o Item.o Consumable.o Equipable.o Food.o Inventory.o Chest.o Key.o Sword.o Enemy.o Dragon.o Troll.o Zombie.o Ghost.o -o  output -lncurses
+output: Main.o Game.o Player.o Map.o Position.o Tile.o Item.o Consumable.o Equipable.o Food.o Inventory.o Chest.o Key.o Sword.o Enemy.o Dragon.o Troll.o Zombie.o Ghost.o Helmet.o Dagger.o Plate.o Skirt.o Poison.o
+	g++ Main.o Game.o Player.o Map.o Position.o Tile.o Item.o Consumable.o Equipable.o Food.o Inventory.o Chest.o Key.o Sword.o Enemy.o Dragon.o Troll.o Zombie.o Ghost.o Helmet.o Dagger.o Plate.o Skirt.o Poison.o -o  output -lncurses
 
 Main.o: Main.cpp
 	g++ -c Main.cpp
@@ -57,6 +57,21 @@ Ghost.o: Ghost.cpp Ghost.h
 
 Zombie.o: Zombie.cpp Zombie.h
 	g++ -c Zombie.cpp
+
+Helmet.o: Helmet.cpp Helmet.h
+	g++ -c Helmet.cpp
+
+Plate.o: Plate.cpp Plate.h
+	g++ -c Plate.cpp
+
+Dagger.o: Dagger.cpp Dagger.h
+	g++ -c Dagger.cpp
+
+Skirt.o: Skirt.cpp Skirt.h
+	g++ -c Skirt.cpp
+
+Poison.o: Poison.cpp Poison.h
+	g++ -c Poison.cpp
 
 clean:
 	rm *.o output

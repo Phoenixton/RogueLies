@@ -17,6 +17,9 @@ public:
     this->attack = dragon_attack;
     this->defense = dragon_defense;
     this->health = dragon_health;
+    this->accuracy = dragon_accuracy;
+    this->dodge = dragon_dodge;
+    this->xp = dragon_xp;
     this->position = p;
     this->feels = dragon_feels;
     this->id = enemyCount;
@@ -29,6 +32,7 @@ public:
     if(this->playerCanBeHit(p)) {
 
       this->attackPlayer(p, infos);
+      p->attackEnemy(this, infos);
 
       nextPos = this->position;
       return nextPos;
@@ -138,9 +142,31 @@ public:
   }
 
   void attackPlayer(Player* player, WINDOW* infos) {
-    player->setHealth(player->getHealth() - this->attack);
-    this->setHealth(this->health - player->getAttack());
-    wprintw(infos, "You got hit for %i and hit back for %i", this->attack, player->getAttack());
+    int rawDamage = this->attack - player->getDefense();
+
+    int r = rand()%100 + 1;
+    r = r + (this->accuracy - player->getDodge());
+
+    if(r < 6) {
+
+      player->setHealth(player->getHealth() - (rawDamage * 0.5));
+      wprintw(infos, "You took %.0f points of damage...\n--------------------------------\n", rawDamage * 0.5);
+    } else if(r >= 6 && r <= 20) {
+      player->setHealth(player->getHealth() - (rawDamage * 0.8));
+
+      wprintw(infos, "You took %.0f points of damage...\n--------------------------------\n", rawDamage * 0.8);
+    } else if(r > 20 && r < 80) {
+      player->setHealth(player->getHealth() - rawDamage);
+
+      wprintw(infos, "You took %i points of damage.\n--------------------------------\n", rawDamage);
+    } else if(r >= 80 && r <= 95) {
+      player->setHealth(player->getHealth() - (rawDamage * 1.2));
+
+      wprintw(infos, "You took %.0f points of damage ! \n--------------------------------\n", rawDamage * 1.2);
+    } else if(r > 95) {
+      player->setHealth(player->getHealth() - (rawDamage * 1.5));
+      wprintw(infos, "You took %.0f points of damage !!\n--------------------------------\n", rawDamage * 1.5);
+    }
   }
 
   //DRAGOUNET FLIEEEES

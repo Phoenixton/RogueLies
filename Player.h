@@ -7,6 +7,7 @@
 #include "Tile.h"
 #include "Item.h"
 #include "Inventory.h"
+#include "Enemy.h"
 
 class Player {
 
@@ -42,8 +43,8 @@ public:
   bool hasAKey();
   bool useAKey();
 
-  void useItem(Item);
-  void equipItem(Item);
+  void useItem(Item*);
+  void equipItem(Item*);
 
   bool displayCharacterFile();
   void redrawCharacFile(WINDOW*);
@@ -52,6 +53,8 @@ public:
   int calculateCurrentAttack();
   int calculateCurrentDefense();
   int calculateCurrentAccuracy();
+  int calculateCurrentDodge();
+  void attackEnemy(Enemy* opponent, WINDOW* infos);
   //getters
   std::string getName() {
     return this->name;
@@ -93,6 +96,22 @@ public:
     return this->xpPoints;
   }
 
+  int getAccuracy() {
+    return this->accuracy;
+  }
+
+  int getDodge() {
+    return this->dodge;
+  }
+
+  void setAccuracy(int i) {
+    this->accuracy = i;
+  }
+
+  void setDodge(int i) {
+    this->dodge = i;
+  }
+
   Inventory* getInventory() {
     return this->inventory;
   }
@@ -102,7 +121,6 @@ public:
   }
   //setters
   bool setName(char* s) {
-    //TODO: checks that the user input actually is a reasonable name ?
     if(true) {
       this->name = s;
       return true;
@@ -124,7 +142,11 @@ public:
   }
 
   void setHealth(int h) {
-    this->health = h;
+    if(h >= this->maxHealth) {
+      this->health = maxHealth;
+    } else {
+      this->health = h;
+    }
   }
 
   void setVision(int v) {
@@ -138,43 +160,43 @@ public:
   void setXpPoints(int x) {
     this->xpPoints = x;
   }
-  Item getHead() {
+  Item* getHead() {
     return this->head;
   }
 
-  Item getTorso() {
+  Item* getTorso() {
     return this->torso;
   }
 
-  Item getLeftHand() {
+  Item* getLeftHand() {
     return this->leftHand;
   }
 
-  Item getRightHand() {
+  Item* getRightHand() {
     return this->rightHand;
   }
 
-  Item getFeet() {
+  Item* getFeet() {
     return this->feet;
   }
 
-  void setHead(Item i) {
+  void setHead(Item* i) {
     this->head = i;
   }
 
-  void setTorso(Item i) {
+  void setTorso(Item* i) {
     this->torso = i;
   }
 
-  void setLeftHand(Item i) {
+  void setLeftHand(Item* i) {
     this->leftHand = i;
   }
 
-  void setRightHand(Item i) {
+  void setRightHand(Item* i) {
     this->rightHand = i;
   }
 
-  void setFeet(Item i) {
+  void setFeet(Item* i) {
     this->feet = i;
   }
 
@@ -231,14 +253,15 @@ private:
   int health;
   int maxHealth;
   int accuracy;
+  int dodge;
   int xpPoints;
   int level;
   Inventory* inventory;
-  Item head;
-  Item torso;
-  Item leftHand;
-  Item rightHand;
-  Item feet;
+  Item* head;
+  Item* torso;
+  Item* leftHand;
+  Item* rightHand;
+  Item* feet;
   bool hasHeadGear;
   bool hasTorsoGear;
   bool hasLeftHandGear;

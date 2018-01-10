@@ -6,7 +6,7 @@ Inventory::Inventory() {
 
 }
 
-bool Inventory::addItem(Item toAdd) {
+bool Inventory::addItem(Item* toAdd) {
   this->items.push_back(toAdd);
   return true;
 }
@@ -15,7 +15,7 @@ bool Inventory::removeItem(int toRemove) {
   //items.erase(std::remove(this->items.begin(), this->items.end(), toRemove), this->items.end());
 
   for(int i = 0; i < this->items.size(); ++i) {
-    if(this->items.at(i).getID() == toRemove) {
+    if(this->items.at(i)->getID() == toRemove) {
       items.erase(this->items.begin() + i);
       return true;
     }
@@ -24,7 +24,7 @@ bool Inventory::removeItem(int toRemove) {
 
 }
 
-bool Inventory::displayInventory(Player* player) {
+bool Inventory::displayInventory(Player* player, WINDOW* infos) {
 
   bool flag = false;
   WINDOW* inventory = newwin(this->items.size()+ 4, 60,10,5);
@@ -41,9 +41,9 @@ bool Inventory::displayInventory(Player* player) {
         wrefresh(confirm);
         wmove(confirm, 1, 1);
         wprintw(confirm, "Would you like to : \n");
-        if(this->items.at(digit).getIsEquipable()) {
+        if(this->items.at(digit)->getIsEquipable()) {
           wprintw(confirm, "0: Equip \n");
-        } else if(this->items.at(digit).getIsConsumable()) {
+        } else if(this->items.at(digit)->getIsConsumable()) {
           wprintw(confirm, "0: Consume \n");
         }
         wprintw(confirm, "1: Remove\n");
@@ -56,17 +56,17 @@ bool Inventory::displayInventory(Player* player) {
         }
         switch(choice) {
           case '0':
-            if(this->items.at(digit).getIsEquipable()) {
-              this->items.at(digit).equipItemOnPlayer(player);
+            if(this->items.at(digit)->getIsEquipable()) {
+              this->items.at(digit)->equipItemOnPlayer(player, infos);
               flag = true;
-            } else if(this->items.at(digit).getIsConsumable()) {
-              this->items.at(digit).useItemOnPlayer(player);
+            } else if(this->items.at(digit)->getIsConsumable()) {
+              this->items.at(digit)->useItemOnPlayer(player, infos);
               flag = true;
 
             }
             break;
           case '1':
-            this->removeItem(this->items.at(digit).getID());
+            this->removeItem(this->items.at(digit)->getID());
             flag = true;
             break;
           case '2':
@@ -96,7 +96,14 @@ void Inventory::redrawInventory(WINDOW* inventory) {
   wprintw(inventory, "Inventory :");
   for(int i = 0; i < this->items.size(); ++i) {
     wmove(inventory, i+3, 1);
-    wprintw(inventory, "%i: %s", i, this->items.at(i).getName().data());
+    wprintw(inventory, "%i: %s, Att: %i, Def: %i, Acc: %i, Dod: %i, Health: %i", i,
+      this->items.at(i)->getName().data(),
+      this->items.at(i)->getAttackAdded(),
+      this->items.at(i)->getDefenseAdded(),
+      this->items.at(i)->getAccuracyAdded(),
+      this->items.at(i)->getDodgeAdded(),
+      this->items.at(i)->getHealthAdded()
+              );
 
   }
   wrefresh(inventory);

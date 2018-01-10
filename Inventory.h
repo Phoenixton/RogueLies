@@ -10,17 +10,17 @@ class Inventory {
 public:
   Inventory();
 
-  bool addItem(Item);
+  bool addItem(Item*);
   bool removeItem(int);
-  bool displayInventory(Player*);
+  bool displayInventory(Player*, WINDOW* infos);
   void redrawInventory(WINDOW* w);
 
-  std::vector<Item> getItems() {
+  std::vector<Item*> getItems() {
     return items;
   }
 
 private:
-  std::vector<Item> items;
+  std::vector<Item*> items;
 
 };
 

@@ -3,6 +3,8 @@
 #include<vector>
 #include<string>
 
+  static int SCALE = 2;
+
   static char playerVisionUp      = '^';
   static char playerVisionDown    = 'v';
   static char playerVisionLeft    = '<';
@@ -17,15 +19,15 @@
   static char lockedChest = '@';
 
 
-  static int maxItemsOnMap = 3;
-  static int minItemsOnMap = 1;
-  static int totalObjectsAvailable = 3;
+  static int maxItemsOnMap = 4;
+  static int minItemsOnMap = 2;
+  static int totalObjectsAvailable = 8;
 
   static int minEnemiesOnMap = 1;
   static int maxEnemiesOnMap = 3;
   static int totalEnemiesAvailable = 4;
 
-  static std::vector<int> availableLevels {1, 2, 3};
+  static std::vector<int> availableLevels {1, 2, 3, 4, 5};
 
   static int rogueChoice = 1;
   static int warriorChoice = 2;
@@ -52,11 +54,15 @@
   static int baseDefenseMage = 5;
 
   static int maxHealthWarrior = 20;
-  static int maxHealthRogue = 10;
+  static int maxHealthRogue = 100;
   static int maxHealthMage = 15;
 
   static int baseAccuracyRogue = 95;
   static int baseAccuracyWarrior = 90;
   static int baseAccuracyMage = 80;
+
+  static int baseDodgeRogue = 50;
+  static int baseDodgeWarrior = 40;
+  static int baseDodgeMage = 60;
 
 #endif

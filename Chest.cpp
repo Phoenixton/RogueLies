@@ -17,7 +17,7 @@ Chest::Chest(bool b, Item* item) {
 }
 
 void Chest::openChest(Player* p) {
-  p->getInventory()->addItem(*this->itemInside);
+  p->getInventory()->addItem(this->itemInside);
 }
 
 void Chest::unlockChest() {

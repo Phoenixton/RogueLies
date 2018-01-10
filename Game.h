@@ -1,14 +1,33 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <algorithm>
+#include <ctime>
 #include<ncurses.h>
 #include <vector>
 #include <tuple>
 
 #include "Player.h"
 #include "Chest.h"
-#include "Enemy.h"
 #include "Map.h"
+#include "Enemy.h"
+#include "Static.h"
+#include "Item.h"
+#include "Food.h"
+#include "Key.h"
+#include "Sword.h"
+#include "Dragon.h"
+#include "Troll.h"
+#include "Zombie.h"
+#include "Ghost.h"
+#include "Helmet.h"
+#include "Plate.h"
+#include "Dagger.h"
+#include "Skirt.h"
+#include "Poison.h"
 
 
 class Game {
@@ -31,6 +50,7 @@ public:
   bool positionNotAlreadyTaken(Position p, std::vector<Position> v);
   char getSymbolOfChestOnPosition(Position p);
   char getSymbolOfEnemyOnPosition(Position p);
+  Enemy* getEnemyOnEmplacement(Position p);
   void changeLevel(char, WINDOW* infos);
   void putCharacterOnStairs(char stairs);
   bool startMenu(WINDOW* initscreen);
@@ -43,8 +63,10 @@ public:
   void printCharacterStats(WINDOW* cs);
   void displayUserName(WINDOW* infos);
   void printCharacter();
+  void checkPlayerLevel();
   bool waitForInput(WINDOW* infos, WINDOW* map);
   void updateVision();
+  bool checkIfPlayerIsAlive();
   Item* possibleLoot();
   //getters
   bool getIsPlaying() {
@@ -58,10 +80,15 @@ public:
     this->isPlaying = b;
   }
 
+  bool getHasWon() {
+    return this->hasWon;
+  }
+
 
 //variables
 private:
   bool isPlaying;
+  bool hasWon;
   int currentState;
   int currentLevel;
   std::vector<Map> mapArray;

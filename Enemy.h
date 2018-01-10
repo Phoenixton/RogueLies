@@ -3,8 +3,9 @@
 #include <ncurses.h>
 
 #include "Position.h"
-#include "Player.h"
 #include "Map.h"
+
+class Player;
 
 class Enemy {
 public:
@@ -18,7 +19,7 @@ public:
 
   }
   virtual void attackPlayer(Player* player, WINDOW* infos) {
-
+    
   }
   virtual bool shufflePositionAfterFloorChange() {
 
@@ -54,9 +55,30 @@ public:
   int getAttack() {
     return this->attack;
   }
+  int getDefense() {
+    return this->defense;
+  }
+  void setDefense(int i) {
+    this->defense = i;
+  }
+  int getAccuracy() {
+    return this->accuracy;
+  }
+  void setAccuracy(int i) {
+    this->accuracy = i;
+  }
+  int getDodge() {
+    return this->dodge;
+  }
+  void setDodge(int i) {
+    this->dodge = i;
+  }
 
   std::string getName() {
     return this->name;
+  }
+  int getXP() {
+    return this->xp;
   }
 
 protected:
@@ -64,11 +86,13 @@ protected:
   int health;
   int attack;
   int defense;
-  //int accuracy
+  int accuracy;
+  int dodge;
   Position position;
   char symbol;
   int feels;
   int id;
+  int xp;
 
   //Item dropLootOnDeath();
 

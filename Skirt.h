@@ -1,23 +1,23 @@
-#ifndef SWORD_H
-#define SWORD_H
+#ifndef SKIRT_H
+#define SKIRT_H
 
 #include "StaticItems.h"
 #include "Equipable.h"
 #include "Player.h"
 
-class Sword : public Equipable {
+class Skirt : public Equipable {
 
 public:
-  Sword() {
-    this->name = "Sword";
-    this->attackAdded = sword_bonus_attack;
-    this->healthAdded = sword_bonus_health;
-    this->defenseAdded = sword_bonus_defense;
-    this->description = sword_description;
-    this->accuracyAdded = sword_bonus_accuracy;
-    this->dodgeAdded = sword_bonus_dodge;
-    this->visionAdded = sword_bonus_vision;
-    this->emplacement = right_handID;
+  Skirt() {
+    this->name = "Skirt";
+    this->attackAdded = skirt_bonus_attack;
+    this->healthAdded = skirt_bonus_health;
+    this->defenseAdded = skirt_bonus_defense;
+    this->description = skirt_description;
+    this->accuracyAdded = skirt_bonus_accuracy;
+    this->dodgeAdded = skirt_bonus_dodge;
+    this->visionAdded = skirt_bonus_vision;
+    this->emplacement = torsoID;
     this->isConsumable = false;
     this->isEquipable = true;
     this->isKey = false;
@@ -50,6 +50,7 @@ public:
           wprintw(infos, "You equiped %s !", this->name);
           p->setTorso(this);
           p->setHasTorsoGear(true);
+            wprintw(infos, "You equiped %s !", this->name);
         }
         break;
       case left_handID:

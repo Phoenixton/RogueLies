@@ -1,27 +1,11 @@
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <vector>
-#include <algorithm>
-#include <ctime>
-
-#include<ncurses.h>
 #include "Game.h"
-#include "Enemy.h"
-#include "Static.h"
-#include "Item.h"
-#include "Food.h"
-#include "Key.h"
-#include "Sword.h"
-#include "Dragon.h"
-#include "Troll.h"
-#include "Zombie.h"
-#include "Ghost.h"
+
 
 Game::Game() {
 
   std::srand(std::time(0));
   isPlaying = true;
+  hasWon = false;
   currentState = 0;
   currentLevel = availableLevels.at(0);
   drawAnOrder();
@@ -64,6 +48,21 @@ std::vector<std::tuple<Chest, Position>> Game::createItemsForMap() {
         break;
       case 2:
         toReturn.push_back(std::make_tuple(Chest(new Food()), positions.at(i)));
+        break;
+      case 3:
+        toReturn.push_back(std::make_tuple(Chest(new Helmet()), positions.at(i)));
+        break;
+      case 4:
+        toReturn.push_back(std::make_tuple(Chest(new Dagger()), positions.at(i)));
+        break;
+      case 5:
+        toReturn.push_back(std::make_tuple(Chest(new Plate()), positions.at(i)));
+        break;
+      case 6:
+        toReturn.push_back(std::make_tuple(Chest(new Skirt()), positions.at(i)));
+        break;
+      case 7:
+        toReturn.push_back(std::make_tuple(Chest(new Poison()), positions.at(i)));
         break;
     }
   }
@@ -180,9 +179,8 @@ void Game::changeLevel(char stairs, WINDOW* infos) {
 
     //Si c'est le dernier tableau
     if(index == (availableLevels.size() -1)) {
-      //TODO:WIN SCREEN
-      wprintw(infos, "You've beaten the game !");
-      wrefresh(infos);
+      this->hasWon = true;
+      this->isPlaying = false;
     } else {
       if(mapArray.size() > index) {
         mapArray.at(index) = currentMap;
@@ -266,11 +264,24 @@ bool Game::startMenu(WINDOW* initscr) {
         flag = true;
         break;
       case '2':
-      //TODO:Rules and commands
+        wprintw(initscr, "-------------- Enemies ------------\n");
+        wprintw(initscr, "t: Trolls ! They are nice, and sweet, and you're a monster for killing them !\n");
+        wprintw(initscr, "d: Dragons. Their neck hurst so they can't see everywhere!\n");
+        wprintw(initscr, "z: Zombies. Mostly, they do nothing. And when they walk, they walk sideways.\n");
+        wprintw(initscr, "G: Ghosts. They never leave anything, but then again, they are ghosts.\n");
+        wprintw(initscr, "-------------- Gameplay ------------\n");
+        wprintw(initscr, "You can collect items, @ are locked chest, you need a key for those, and $ are unlocked ones!\n");
+        wprintw(initscr, "a,z,e,q,s,d,w,x,c to move around, try it!\n");
+        wprintw(initscr, "The arrow keys to look around, try it as well!\n");
+        wprintw(initscr, "And i to open the inventory, and k to open your character resume!\n");
+        wprintw(initscr, "BEAT THE GAME, PLAYER, BY FINDING THE LAST STAIRCASE !\n");
+        wrefresh(initscr);
+        getch();
         flag = false;
         break;
       case '3':
         this->isPlaying = false;
+        flag = true;
         break;
     }
 
@@ -392,9 +403,17 @@ char Game::getSymbolOfChestOnPosition(Position p) {
   }
 }
 
+Enemy* Game::getEnemyOnEmplacement(Position p) {
+  for(int i = 0; i < this->enemiesOnCurrentMap.size(); ++i) {
+    if(this->enemiesOnCurrentMap.at(i)->getPosition().compare(p)) {
+      return this->enemiesOnCurrentMap.at(i);
+    }
+  }
+}
+
 void Game::printInformations(WINDOW* infos) {
   wmove(infos, 1,1);
-  this->player.getCurrentPos().toString(infos);
+  //this->player.getCurrentPos().toString(infos);
 
   wrefresh(infos);
 }
@@ -412,13 +431,15 @@ void Game::printCharacterStats(WINDOW* charStats) {
   wmove(charStats, 5, 1);
   wprintw(charStats, "Accuracy : %i", this->player.calculateCurrentAccuracy());
   wmove(charStats, 6, 1);
-  wprintw(charStats, "Level : %i", this->player.getLevel());
+  wprintw(charStats, "Dodge : %i", this->player.calculateCurrentDodge());
   wmove(charStats, 7, 1);
+  wprintw(charStats, "Level : %i", this->player.getLevel());
+  wmove(charStats, 8, 1);
   wprintw(charStats, "XP Points : %i", this->player.getXpPoints());
 
-  wmove(charStats, 8, 1);
+  wmove(charStats, 10, 1);
   wprintw(charStats, "Floor Items : %i", this->itemsOnCurrentMap.size());
-  wmove(charStats, 9, 1);
+  wmove(charStats, 11, 1);
   wprintw(charStats, "Floor Enemies : %i", this->enemiesOnCurrentMap.size());
   wrefresh(charStats);
 }
@@ -431,7 +452,7 @@ bool Game::waitForInput(WINDOW *infos, WINDOW* map) {
 
   switch(ch) {
     case 'i':
-      flag = (this->player.getInventory()->displayInventory(&this->player));
+      flag = (this->player.getInventory()->displayInventory(&this->player, infos));
       break;
     case 'k':
       flag = (this->player.displayCharacterFile());
@@ -439,68 +460,115 @@ bool Game::waitForInput(WINDOW *infos, WINDOW* map) {
     case 'z':
       destination = Position(this->player.getCurrentPos().getX()-1,
                               this->player.getCurrentPos().getY());
-      flag = this->player.moveUp(currentMap.charAt(Position(this->player.getCurrentPos().getX()-1,
-                              this->player.getCurrentPos().getY())), infos);
+      if(isEnemyOnPosition(destination)) {
+        flag = true;
+
+      } else {
+
+        flag = this->player.moveUp(currentMap.charAt(Position(this->player.getCurrentPos().getX()-1,
+                                this->player.getCurrentPos().getY())), infos);
+
+      }
       break;
     case 'q':
       destination = Position(this->player.getCurrentPos().getX(),
                               this->player.getCurrentPos().getY()-1);
-      flag = this->player.moveLeft(currentMap.charAt(Position(this->player.getCurrentPos().getX(),
-                              this->player.getCurrentPos().getY()-1)), infos);
+      if(isEnemyOnPosition(destination)) {
+        flag = true;
+
+      } else {
+
+        flag = this->player.moveLeft(currentMap.charAt(Position(this->player.getCurrentPos().getX(),
+                                this->player.getCurrentPos().getY()-1)), infos);
+
+      }
       break;
 
     case 's':
       destination = Position(this->player.getCurrentPos().getX()+1,
                                 this->player.getCurrentPos().getY());
-      flag = this->player.moveDown(currentMap.charAt(Position(this->player.getCurrentPos().getX()+1,
-                                this->player.getCurrentPos().getY())), infos);
-      break;
+        if(isEnemyOnPosition(destination)) {
+          flag = true;
+
+        } else {
+
+          flag = this->player.moveDown(currentMap.charAt(Position(this->player.getCurrentPos().getX()+1,
+                                  this->player.getCurrentPos().getY())), infos);
+
+        }
+        break;
 
     case 'd':
       destination = Position(this->player.getCurrentPos().getX(),
                                 this->player.getCurrentPos().getY()+1);
-      flag = this->player.moveRight(currentMap.charAt(Position(this->player.getCurrentPos().getX(),
-                                this->player.getCurrentPos().getY()+1)), infos);
-      break;
+        if(isEnemyOnPosition(destination)) {
+          flag = true;
+          } else {
+
+          flag = this->player.moveRight(currentMap.charAt(Position(this->player.getCurrentPos().getX(),
+                                  this->player.getCurrentPos().getY()+1)), infos);
+
+        }
+        break;
     case 'a':
       destination = Position(this->player.getCurrentPos().getX()-1,
                                 this->player.getCurrentPos().getY()-1);
-      flag = this->player.moveNW(currentMap.charAt(Position(this->player.getCurrentPos().getX() -1,
-                                                            this->player.getCurrentPos().getY())),
-                      currentMap.charAt(Position(this->player.getCurrentPos().getX(),
-                                                this->player.getCurrentPos().getY() -1)),
-                      currentMap.charAt(Position(this->player.getCurrentPos().getX()-1,
-                                                this->player.getCurrentPos().getY()-1)), infos);
-      break;
+        if(isEnemyOnPosition(destination)) {
+          flag = true;
+        } else {
+
+          flag = this->player.moveNW(currentMap.charAt(Position(this->player.getCurrentPos().getX() -1,
+                                                              this->player.getCurrentPos().getY())),
+                        currentMap.charAt(Position(this->player.getCurrentPos().getX(),
+                                                  this->player.getCurrentPos().getY() -1)),
+                        currentMap.charAt(Position(this->player.getCurrentPos().getX()-1,
+                                                  this->player.getCurrentPos().getY()-1)), infos);
+
+        }
+        break;
     case 'e':
       destination = Position(this->player.getCurrentPos().getX()-1,
                       this->player.getCurrentPos().getY()+1);
+      if(isEnemyOnPosition(destination)) {
+        flag = true;
+
+      } else {
       flag = this->player.moveNE(currentMap.charAt(Position(this->player.getCurrentPos().getX() -1,
                                                           this->player.getCurrentPos().getY())),
                               currentMap.charAt(Position(this->player.getCurrentPos().getX(),
                                               this->player.getCurrentPos().getY() +1)),
                               currentMap.charAt(Position(this->player.getCurrentPos().getX()-1,
                                               this->player.getCurrentPos().getY()+1)),infos);
+      }
       break;
     case 'w':
       destination = Position(this->player.getCurrentPos().getX()+1,
                                 this->player.getCurrentPos().getY()-1);
+      if(isEnemyOnPosition(destination)) {
+        flag = true;
+      } else {
       flag = this->player.moveSW(currentMap.charAt(Position(this->player.getCurrentPos().getX() +1,
                                                           this->player.getCurrentPos().getY())),
                     currentMap.charAt(Position(this->player.getCurrentPos().getX(),
                                               this->player.getCurrentPos().getY() -1)),
                     currentMap.charAt(Position(this->player.getCurrentPos().getX()+1,
                                               this->player.getCurrentPos().getY()-1)), infos);
+      }
       break;
     case 'c':
       destination = Position(this->player.getCurrentPos().getX()+1,
                                 this->player.getCurrentPos().getY()+1);
+      if(isEnemyOnPosition(destination)) {
+        flag = true;
+      } else {
+
       flag = this->player.moveSE(currentMap.charAt(Position(this->player.getCurrentPos().getX()+1,
                                                           this->player.getCurrentPos().getY())),
                     currentMap.charAt(Position(this->player.getCurrentPos().getX(),
                                               this->player.getCurrentPos().getY() +1)),
                     currentMap.charAt(Position(this->player.getCurrentPos().getX()+1,
                                               this->player.getCurrentPos().getY()+1)), infos);
+      }
       break;
     case KEY_UP:
       this->player.lookNorth(infos);
@@ -519,12 +587,18 @@ bool Game::waitForInput(WINDOW *infos, WINDOW* map) {
       return true;
       break;
 
+
   }
 
   if(currentMap.charAt(destination).getSymbol() == stairsUp || currentMap.charAt(destination).getSymbol() == stairsDown) {
     changeLevel(currentMap.charAt(destination).getSymbol(), infos);
 
   } else if(isEnemyOnPosition(destination)) {
+
+    Enemy* opponent = getEnemyOnEmplacement(destination);
+    this->player.attackEnemy(opponent, infos);
+    opponent->attackPlayer(&this->player, infos);
+    wrefresh(infos);
 
   } else if(isChestOnPosition(destination)) {
     if(getSymbolOfChestOnPosition(destination) == lockedChest) {
@@ -533,7 +607,7 @@ bool Game::waitForInput(WINDOW *infos, WINDOW* map) {
         this->player.useAKey();
         for(int i = 0; i < this->itemsOnCurrentMap.size(); ++i) {
           if(destination.compare(std::get<1>(this->itemsOnCurrentMap.at(i)))) {
-            this->player.getInventory()->addItem(*std::get<0>(this->itemsOnCurrentMap.at(i)).getItemInside());
+            this->player.getInventory()->addItem(std::get<0>(this->itemsOnCurrentMap.at(i)).getItemInside());
             wprintw(infos, "You unlocked the chest with one of your keys and found %s ! \n", std::get<0>(this->itemsOnCurrentMap.at(i)).getItemInside()->getName().data());
             wrefresh(infos);
             this->itemsOnCurrentMap.erase(this->itemsOnCurrentMap.begin() + i);
@@ -547,7 +621,7 @@ bool Game::waitForInput(WINDOW *infos, WINDOW* map) {
     } else if(getSymbolOfChestOnPosition(destination) == unlockedChest) {
       for(int i = 0; i < this->itemsOnCurrentMap.size(); ++i) {
         if(std::get<1>(this->itemsOnCurrentMap.at(i)).compare(destination)) {
-          this->player.getInventory()->addItem(*std::get<0>(this->itemsOnCurrentMap.at(i)).getItemInside());
+          this->player.getInventory()->addItem(std::get<0>(this->itemsOnCurrentMap.at(i)).getItemInside());
           wprintw(infos, "You opened the unlocked chest with one of your keys and found %s ! \n", std::get<0>(this->itemsOnCurrentMap.at(i)).getItemInside()->getName().data());
           wrefresh(infos);
           this->itemsOnCurrentMap.erase(this->itemsOnCurrentMap.begin() + i);
@@ -597,16 +671,42 @@ void Game::updateVision() {
 
 void Game::enemiesMoves(WINDOW* infos) {
   for(int i = 0; i < this->enemiesOnCurrentMap.size(); i++) {
+
     this->enemiesOnCurrentMap.at(i)->setPosition(this->enemiesOnCurrentMap.at(i)->move(&this->player, &this->currentMap, this->enemiesOnCurrentMap, infos));
 
     if(this->enemiesOnCurrentMap.at(i)->getHealth() <= 0) {
+      this->player.setXpPoints(this->player.getXpPoints() + this->enemiesOnCurrentMap.at(i)->getXP());
       if(this->enemiesOnCurrentMap.at(i)->leaveLootBehind()) {
-        this->itemsOnCurrentMap.push_back(std::make_tuple(Chest(this->possibleLoot()), this->enemiesOnCurrentMap.at(i)->getPosition())); // TODO:
+        this->itemsOnCurrentMap.push_back(std::make_tuple(Chest(false, this->possibleLoot()), this->enemiesOnCurrentMap.at(i)->getPosition())); // TODO:
       }
       this->enemiesOnCurrentMap.erase(this->enemiesOnCurrentMap.begin() + i);
     }
   }
 
+}
+
+void Game::checkPlayerLevel() {
+  if(this->player.getXpPoints() / this->player.getLevel() >= 100) {
+    this->player.setLevel((this->player.getXpPoints() / 100) + 1);
+    int r = rand() % (5);
+    switch(r) {
+      case 0:
+        this->player.setAttack(this->player.getAttack() + 2);
+        break;
+      case 1:
+        this->player.setMaxHealth(this->player.getMaxHealth() + 10);
+        break;
+      case 2:
+        this->player.setDefense(this->player.getDefense() + 2);
+        break;
+      case 3:
+        this->player.setAccuracy(this->player.getAccuracy() + 2);
+        break;
+      case 4:
+        this->player.setDodge(this->player.getDodge() + 2);
+        break;
+    }
+  }
 }
 
 Item* Game::possibleLoot() {
@@ -623,7 +723,30 @@ Item* Game::possibleLoot() {
     case 2:
       toReturn = new Food();
       break;
+    case 3:
+      toReturn = new Helmet();
+      break;
+    case 4:
+      toReturn = new Plate();
+      break;
+    case 5:
+      toReturn = new Dagger();
+      break;
+    case 6:
+      toReturn = new Skirt();
+      break;
+    case 7:
+      toReturn = new Poison();
+      break;
   }
 
   return toReturn;
+}
+
+bool Game::checkIfPlayerIsAlive() {
+  if(this->player.getHealth() <= 0) {
+    this->isPlaying = false;
+    return false;
+  }
+  return true;
 }
