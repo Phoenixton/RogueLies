@@ -1,5 +1,5 @@
 #include "Chest.h"
-Chest::Chest(Item item) {
+Chest::Chest(Item* item) {
   int randNum = rand()%2;
 
   if(randNum == 0) {
@@ -11,13 +11,13 @@ Chest::Chest(Item item) {
   this->itemInside = item;
 }
 
-Chest::Chest(bool b, Item item) {
+Chest::Chest(bool b, Item* item) {
   this->isLocked = b;
   this->itemInside = item;
 }
 
 void Chest::openChest(Player* p) {
-  p->getInventory()->addItem(this->itemInside);
+  p->getInventory()->addItem(*this->itemInside);
 }
 
 void Chest::unlockChest() {

@@ -7,6 +7,7 @@
 
 #include "Player.h"
 #include "Chest.h"
+#include "Enemy.h"
 #include "Map.h"
 
 
@@ -20,15 +21,19 @@ public:
 
 
   //functions
+  void enemiesMoves(WINDOW*);
   void drawAnOrder();
   std::vector<std::tuple<Chest, Position>> createItemsForMap();
+  std::vector<Enemy*> createEnemiesForMap();
+  bool isEnemyOnPosition(Position p);
   bool isChestOnPosition(Position p);
   std::vector<Position> getFreePositions(int numberPositionsNeeded);
   bool positionNotAlreadyTaken(Position p, std::vector<Position> v);
   char getSymbolOfChestOnPosition(Position p);
+  char getSymbolOfEnemyOnPosition(Position p);
   void changeLevel(char, WINDOW* infos);
   void putCharacterOnStairs(char stairs);
-  void startMenu(WINDOW* initscreen);
+  bool startMenu(WINDOW* initscreen);
   int chooseClass(WINDOW* initscreen);
   //void init(WINDOW* map, WINDOW* infos);
   void inGameMenu();
@@ -39,8 +44,8 @@ public:
   void displayUserName(WINDOW* infos);
   void printCharacter();
   bool waitForInput(WINDOW* infos, WINDOW* map);
-  void displayInventory();
   void updateVision();
+  Item* possibleLoot();
   //getters
   bool getIsPlaying() {
     return this->isPlaying;
@@ -64,6 +69,8 @@ private:
   Player player;
   std::vector<std::vector<std::tuple<Chest, Position>>> itemsOnMaps;
   std::vector<std::tuple<Chest, Position>> itemsOnCurrentMap;
+  std::vector<std::vector<Enemy*>> enemiesOnMaps;
+  std::vector<Enemy*> enemiesOnCurrentMap;
 };
 
 #endif //GAME_H

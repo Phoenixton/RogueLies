@@ -95,8 +95,8 @@ void Player::drawPlayer(WINDOW* map) {
 
 bool Player::hasAKey() {
   for(int i = 0; i < this->inventory->getItems().size(); ++i) {
-
     if(this->inventory->getItems().at(i).getIsKey()) {
+
       return true;
     }
   }
@@ -111,6 +111,49 @@ bool Player::useAKey() {
   }
   return false;
 }
+
+bool Player::displayCharacterFile() {
+
+    WINDOW* characFile = newwin(10, 40,10,5);
+    this->redrawCharacFile(characFile);
+    int ch;
+
+    while((ch = getch()) != 'k') {
+
+    }
+    werase(characFile);
+    wrefresh(characFile);
+    delwin(characFile);
+    return false;
+}
+
+void Player::redrawCharacFile(WINDOW* characFile) {
+  werase(characFile);
+  wrefresh(characFile);
+  box(characFile, '*', '*');
+  touchwin(characFile);
+  wrefresh(characFile);
+  wmove(characFile, 1, 25);
+  wprintw(characFile, "characFile :");
+  wmove(characFile, 2,1);
+  std::string s;
+  s = (this->hasHeadGear) ? this->head.getName() : "None";
+  wprintw(characFile, "Head: %s",s.data());;
+  s = (this->hasTorsoGear) ? this->torso.getName() : "None";
+  wmove(characFile, 3, 1);
+  wprintw(characFile, "Torso : %s", s.data());
+  wmove(characFile, 4, 1);
+  s = (this->hasLeftHandGear) ? this->leftHand.getName() : "None";
+  wprintw(characFile, "Left Hand: %s",s.data());
+  wmove(characFile, 5, 1);
+  s = (this->hasRightHandGear) ? this->rightHand.getName() : "None";
+  wprintw(characFile, "Right Hand : %s", s.data());
+  wmove(characFile, 6, 1);
+  s = (this->hasFeetGear) ? this->feet.getName() : "None";
+  wprintw(characFile, "Feet : %s", s.data());
+  wrefresh(characFile);
+}
+
 
 bool Player::moveUp(Tile up, WINDOW* infos) {
 
@@ -243,7 +286,8 @@ void Player::equipItem(Item i) {
   switch(emplacement) {
     case headID:
       if(this->hasHeadGear) {
-
+        this->inventory->getItems().push_back(this->head);
+        this->head = i;
       } else {
         this->head = i;
         this->hasHeadGear = true;

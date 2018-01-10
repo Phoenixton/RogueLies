@@ -9,7 +9,7 @@ Sword::Sword() {
   this->description = sword_description;
   this->accuracyAdded = sword_bonus_accuracy;
   this->visionAdded = sword_bonus_vision;
-  this->emplacement = 0;
+  this->emplacement = right_handID;
   this->isConsumable = false;
   this->isEquipable = true;
   this->isKey = false;
@@ -22,7 +22,8 @@ bool Item::equipItemOnPlayer(Player* p) {
   switch(emplacement) {
     case headID:
       if(p->getHasHeadGear()) {
-
+        p->getInventory()->getItems().push_back(p->getHead());
+        p->setHead(*this);
       } else {
         p->setHead(*this);
         p->setHasHeadGear(true);
@@ -37,34 +38,33 @@ bool Item::equipItemOnPlayer(Player* p) {
         p->setHasTorsoGear(true);
       }
       break;
-      /*
     case left_handID:
-      if(this->hasLeftHandGear) {
-        this->inventory->getItems().push_back(this->leftHand);
-        this->leftHand = i;
+      if(p->getHasLeftHandGear()) {
+        p->getInventory()->getItems().push_back(p->getLeftHand());
+        p->setLeftHand(*this);
       } else {
-        this->leftHand = i;
-        this->hasLeftHandGear = true;
+        p->setLeftHand(*this);
+        p->setHasLeftHandGear(true);
       }
-      break;
+    break;
     case right_handID:
-      if(this->hasRightHandGear) {
-        this->inventory->getItems().push_back(this->rightHand);
-        this->rightHand = i;
+      if(p->getHasRightHandGear()) {
+        p->getInventory()->getItems().push_back(p->getRightHand());
+        p->setRightHand(*this);
       } else {
-        this->rightHand = i;
-        this->hasRightHandGear = true;
+        p->setRightHand(*this);
+        p->setHasRightHandGear(true);
       }
-      break;
+    break;
     case feetID:
-      if(this->hasFeetGear) {
-        this->inventory->getItems().push_back(this->feet);
-        this->feet = i;
+      if(p->getHasFeetGear()) {
+        p->getInventory()->getItems().push_back(p->getFeet());
+        p->setFeet(*this);
       } else {
-        this->feet = i;
-        this->hasFeetGear = true;
+        p->setFeet(*this);
+        p->setHasFeetGear(true);
       }
-      break;*/
+    break;
   }
 
   //removes i from inventory since it's now equiped

@@ -7,8 +7,8 @@ class Chest {
 
 public:
 
-  Chest(Item item);
-  Chest(bool b, Item item);
+  Chest(Item* item);
+  Chest(bool b, Item* item);
 
   void openChest(Player* p);
   void unlockChest();
@@ -22,11 +22,11 @@ public:
     this->isLocked = b;
   }
 
-  Item getItemInside() {
+  Item* getItemInside() {
     return this->itemInside;
   }
 
-  void setItemInside(Item i) {
+  void setItemInside(Item* i) {
     this->itemInside = i;
   }
 
@@ -41,7 +41,7 @@ public:
 
 private:
   bool isLocked;
-  Item itemInside;
+  Item* itemInside;
 
 };
 #endif

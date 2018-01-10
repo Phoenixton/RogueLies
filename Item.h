@@ -37,6 +37,10 @@ public:
     this->id = i;
   }
 
+  void setIsKey(bool b) {
+    this->isKey = true;
+  }
+
   int getID() {
     return this->id;
   }

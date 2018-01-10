@@ -12,7 +12,6 @@
   static char stairsUp          = '/';
   static char stairsDown        = '\\';
   static char hasNotBeenDiscovered = '*';
-  static char troll = 'k';
   static char chicken = 'c';
   static char unlockedChest = '$';
   static char lockedChest = '@';
@@ -20,8 +19,11 @@
 
   static int maxItemsOnMap = 3;
   static int minItemsOnMap = 1;
-  static int totalObjectsAvailable = 2;
+  static int totalObjectsAvailable = 3;
 
+  static int minEnemiesOnMap = 1;
+  static int maxEnemiesOnMap = 3;
+  static int totalEnemiesAvailable = 4;
 
   static std::vector<int> availableLevels {1, 2, 3};
 

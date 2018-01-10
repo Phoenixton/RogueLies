@@ -16,8 +16,6 @@ int main()
 	}
 	start_color();			/* Start color 			*/
 
-  int parent_x, parent_y, new_x, new_y;
-  int score_size = 3;
 
   WINDOW* map = newwin(20,70,0,0);
   WINDOW* infos = newwin(5,70,20,0);
@@ -30,8 +28,9 @@ int main()
   refresh();
 
   Game game;
-  game.startMenu(map);
-  game.displayUserName(infos);
+  while(!game.startMenu(map)) {
+
+  }
 
   //WINDOW* inventory = newwin(25,18,0,70);
 
@@ -48,21 +47,23 @@ int main()
   wrefresh(characterStats);
 
   while(game.getIsPlaying()) {
-
+    
     game.updateVision();
     game.printMap(map);
     game.printInformations(infos);
     game.printCharacterStats(characterStats);
     werase(map);
-
+    werase(characterStats);
 
     box(map,0,0);
     box(infos,0,0);
+    box(characterStats, 0, 0);
     wmove(map, 1,1);
     wmove(infos, 1,1);
     while(!game.waitForInput(infos, map)) {
     }
     wclrtoeol(infos);
+    game.enemiesMoves(infos);
   }
 
   /*

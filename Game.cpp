@@ -7,13 +7,20 @@
 
 #include<ncurses.h>
 #include "Game.h"
+#include "Enemy.h"
 #include "Static.h"
 #include "Item.h"
 #include "Food.h"
 #include "Key.h"
 #include "Sword.h"
+#include "Dragon.h"
+#include "Troll.h"
+#include "Zombie.h"
+#include "Ghost.h"
+
 Game::Game() {
 
+  std::srand(std::time(0));
   isPlaying = true;
   currentState = 0;
   currentLevel = availableLevels.at(0);
@@ -21,10 +28,12 @@ Game::Game() {
   currentLevel = availableLevels.at(0);
   std::string level = std::to_string(this->currentLevel);
   currentMap = Map("map" + level + ".txt");
+  putCharacterOnStairs(stairsDown);
+  enemiesOnCurrentMap = createEnemiesForMap();
   itemsOnCurrentMap = createItemsForMap();
+
   //std::get<1>(itemsOnCurrentMap.at(0)).debug();
   //places the character at start point
-  putCharacterOnStairs(stairsDown);
   //Player player;
 
 }
@@ -35,25 +44,26 @@ Game::~Game() {
 }
 
 void Game::drawAnOrder() {
-  std::srand(std::time(0));
   std::random_shuffle(availableLevels.begin(), availableLevels.end());
 }
 
 
 std::vector<std::tuple<Chest, Position>> Game::createItemsForMap() {
   std::vector<std::tuple<Chest, Position>> toReturn;
-  std::srand(std::time(nullptr));
   int randNum = rand()%(maxItemsOnMap-minItemsOnMap + 1) + minItemsOnMap;
   std::vector<Position> positions = getFreePositions(randNum);
   for(int i = 0; i < randNum; ++i) {
-    int r = rand()%(totalObjectsAvailable +1);
+    int r = rand()%(totalObjectsAvailable);
 
     switch(r) {
       case 0:
-        toReturn.push_back(std::make_tuple(Chest(Sword()), positions.at(i)));
+        toReturn.push_back(std::make_tuple(Chest(new Key()), positions.at(i)));
         break;
       case 1:
-        toReturn.push_back(std::make_tuple(Chest(Key()), positions.at(i)));
+        toReturn.push_back(std::make_tuple(Chest(new Sword()), positions.at(i)));
+        break;
+      case 2:
+        toReturn.push_back(std::make_tuple(Chest(new Food()), positions.at(i)));
         break;
     }
   }
@@ -61,9 +71,37 @@ std::vector<std::tuple<Chest, Position>> Game::createItemsForMap() {
   return toReturn;
 }
 
+
+std::vector<Enemy*> Game::createEnemiesForMap() {
+  std::vector<Enemy*> toReturn;
+  int randNum = rand() % totalEnemiesAvailable + 1;
+  std::vector<Position> positions = getFreePositions(randNum);
+
+  for(int i = 0; i < randNum; ++i) {
+    //int r = rand()%(totalEnemiesAvailable +1);
+    int r = rand()%(totalEnemiesAvailable);
+    switch(r) {
+      case 0:
+        toReturn.push_back(new Dragon(positions.at(i)));
+        break;
+      case 1:
+        toReturn.push_back(new Troll(positions.at(i)));
+        break;
+      case 2:
+        toReturn.push_back(new Zombie(positions.at(i)));
+        break;
+      case 3:
+        toReturn.push_back(new Ghost(positions.at(i)));
+        break;
+
+    }
+  }
+return toReturn;
+}
+
+
 std::vector<Position> Game::getFreePositions(int numberPositionsNeeded) {
   std::vector<Position> toReturn;
-  std::srand(std::time(nullptr));
   int randX;
   int randY;
   for(int i = 0; i < numberPositionsNeeded; ++i) {
@@ -74,15 +112,17 @@ std::vector<Position> Game::getFreePositions(int numberPositionsNeeded) {
       if((this->currentMap.charAt(Position(randX, randY)).getSymbol() == ' ') && positionNotAlreadyTaken(Position(randX, randY), toReturn)) {
 
         flag = false;
+
       }
 
     }
     toReturn.push_back(Position(randX, randY));
   }
   return toReturn;
-
-
 }
+
+
+
 
 bool Game::positionNotAlreadyTaken(Position p, std::vector<Position> v) {
 
@@ -91,6 +131,10 @@ bool Game::positionNotAlreadyTaken(Position p, std::vector<Position> v) {
       return false;
     }
   }
+
+  if(p.compare(this->player.getCurrentPos())) {
+    return false;
+  }
   return true;
 }
 
@@ -98,8 +142,6 @@ void Game::changeLevel(char stairs, WINDOW* infos) {
   auto match = std::find(availableLevels.begin(), availableLevels.end(), currentLevel);
   int index = match - availableLevels.begin();
 
-  //TODO:proper inventory !!!!!!!!!!!!
-  this->player.getInventory()->addItem(Key());
   //Si up et c'est le first niveau
   if(stairs == stairsUp) {
 
@@ -109,15 +151,26 @@ void Game::changeLevel(char stairs, WINDOW* infos) {
       if(mapArray.size() > index)  {
         mapArray.at(index) = currentMap;
         itemsOnMaps.at(index) = itemsOnCurrentMap;
+        enemiesOnMaps.at(index) = enemiesOnCurrentMap;
+
       } else {
         mapArray.push_back(currentMap);
         itemsOnMaps.push_back(itemsOnCurrentMap);
+        enemiesOnMaps.push_back(enemiesOnCurrentMap);
       }
       currentLevel = availableLevels.at(index - 1);
       std::string level = std::to_string(this->currentLevel);
       currentMap = mapArray.at(index - 1);
       itemsOnCurrentMap = itemsOnMaps.at(index - 1);
+      enemiesOnCurrentMap = enemiesOnMaps.at(index - 1);
+      std::vector<Position> newPositions = getFreePositions(enemiesOnCurrentMap.size());
 
+      //shuffle new positions for monsters who change pos after you come back
+      for(int i = 0; i < enemiesOnCurrentMap.size(); ++i) {
+        if(enemiesOnCurrentMap.at(i)->shufflePositionAfterFloorChange()) {
+          enemiesOnCurrentMap.at(i)->setPosition(newPositions.at(i));
+        }
+      }
       putCharacterOnStairs(stairs);
     } else {
     wprintw(infos, "You cannot go up, this is the first level");
@@ -127,28 +180,42 @@ void Game::changeLevel(char stairs, WINDOW* infos) {
 
     //Si c'est le dernier tableau
     if(index == (availableLevels.size() -1)) {
+      //TODO:WIN SCREEN
       wprintw(infos, "You've beaten the game !");
       wrefresh(infos);
     } else {
       if(mapArray.size() > index) {
         mapArray.at(index) = currentMap;
         itemsOnMaps.at(index) = itemsOnCurrentMap;
+        enemiesOnMaps.at(index) = enemiesOnCurrentMap;
         currentLevel = availableLevels.at(index + 1);
         std::string level = std::to_string(this->currentLevel);
         if(mapArray.size() > index+1) {
           currentMap = mapArray.at(index + 1);
           itemsOnCurrentMap = itemsOnMaps.at(index + 1);
+          enemiesOnCurrentMap = enemiesOnMaps.at(index + 1);
+          std::vector<Position> newPositions = getFreePositions(enemiesOnCurrentMap.size());
+
+          //shuffle new positions for monsters who change pos after you come back
+          for(int i = 0; i < enemiesOnCurrentMap.size(); ++i) {
+            if(enemiesOnCurrentMap.at(i)->shufflePositionAfterFloorChange()) {
+              enemiesOnCurrentMap.at(i)->setPosition(newPositions.at(i));
+            }
+          }
         } else {
           currentMap = Map("map" + level + ".txt");
           itemsOnCurrentMap = createItemsForMap();
+          enemiesOnCurrentMap = createEnemiesForMap();
         }
       } else {
         mapArray.push_back(currentMap);
         itemsOnMaps.push_back(itemsOnCurrentMap);
+        enemiesOnMaps.push_back(enemiesOnCurrentMap);
         currentLevel = availableLevels.at(index + 1);
         std::string level = std::to_string(this->currentLevel);
         currentMap = Map("map" + level +".txt");
         itemsOnCurrentMap = createItemsForMap();
+        enemiesOnCurrentMap = createEnemiesForMap();
       }
 
       putCharacterOnStairs(stairs);
@@ -171,7 +238,9 @@ void Game::putCharacterOnStairs(char stairs) {
   }
 }
 
-void Game::startMenu(WINDOW* initscr) {
+bool Game::startMenu(WINDOW* initscr) {
+
+  bool flag = false;
   mvwprintw(initscr, 0, 0, "Welcome to the dungeon !\n");
   wrefresh(initscr);
   getch();
@@ -194,9 +263,11 @@ void Game::startMenu(WINDOW* initscr) {
         classChoice = chooseClass(initscr);
         werase(initscr);
         inputName(initscr, classChoice);
+        flag = true;
         break;
       case '2':
       //TODO:Rules and commands
+        flag = false;
         break;
       case '3':
         this->isPlaying = false;
@@ -204,9 +275,8 @@ void Game::startMenu(WINDOW* initscr) {
     }
 
   werase(initscr);
-
+  return flag;
 }
-
 
 void Game::inputName(WINDOW* initscr, int classChoice) {
 
@@ -238,14 +308,14 @@ int Game::chooseClass(WINDOW* initscr) {
 
   return ch;
 }
-
+/*
 
 void Game::displayUserName(WINDOW* infos) {
   wprintw(infos, "Your user name is %s", this->player.getName().data());
   wrefresh(infos);
   getch();
 }
-
+*/
 void Game::printMap(WINDOW* map) {
 
   init_pair(1, COLOR_WHITE, COLOR_MAGENTA);
@@ -259,7 +329,10 @@ void Game::printMap(WINDOW* map) {
 
             Tile temp = currentMap.charAt(Position(i, j));
             if(temp.getHasBeenDiscovered()) {
-              if(isChestOnPosition(Position(i, j))) {
+
+              if(isEnemyOnPosition(Position(i, j))) {
+                waddch(map, getSymbolOfEnemyOnPosition(Position(i,j)));
+              } else if(isChestOnPosition(Position(i, j))) {
 
                 waddch(map, getSymbolOfChestOnPosition(Position(i, j)));
 
@@ -284,6 +357,23 @@ void Game::printMap(WINDOW* map) {
 
   	attroff(COLOR_PAIR(1));
 }
+
+bool Game::isEnemyOnPosition(Position p) {
+  for(int i = 0; i < this->enemiesOnCurrentMap.size(); i++) {
+    if(this->enemiesOnCurrentMap.at(i)->getPosition().compare(p)) {
+      return true;
+    }
+  }
+}
+
+char Game::getSymbolOfEnemyOnPosition(Position p) {
+  for(int i = 0; i < this->enemiesOnCurrentMap.size(); ++i) {
+    if(this->enemiesOnCurrentMap.at(i)->getPosition().compare(p)) {
+      return this->enemiesOnCurrentMap.at(i)->getSymbol();
+    }
+  }
+}
+
 
 bool Game::isChestOnPosition(Position p) {
   for(int i = 0; i < this->itemsOnCurrentMap.size(); ++i) {
@@ -328,6 +418,8 @@ void Game::printCharacterStats(WINDOW* charStats) {
 
   wmove(charStats, 8, 1);
   wprintw(charStats, "Floor Items : %i", this->itemsOnCurrentMap.size());
+  wmove(charStats, 9, 1);
+  wprintw(charStats, "Floor Enemies : %i", this->enemiesOnCurrentMap.size());
   wrefresh(charStats);
 }
 
@@ -340,6 +432,9 @@ bool Game::waitForInput(WINDOW *infos, WINDOW* map) {
   switch(ch) {
     case 'i':
       flag = (this->player.getInventory()->displayInventory(&this->player));
+      break;
+    case 'k':
+      flag = (this->player.displayCharacterFile());
       break;
     case 'z':
       destination = Position(this->player.getCurrentPos().getX()-1,
@@ -428,6 +523,9 @@ bool Game::waitForInput(WINDOW *infos, WINDOW* map) {
 
   if(currentMap.charAt(destination).getSymbol() == stairsUp || currentMap.charAt(destination).getSymbol() == stairsDown) {
     changeLevel(currentMap.charAt(destination).getSymbol(), infos);
+
+  } else if(isEnemyOnPosition(destination)) {
+
   } else if(isChestOnPosition(destination)) {
     if(getSymbolOfChestOnPosition(destination) == lockedChest) {
 
@@ -435,8 +533,8 @@ bool Game::waitForInput(WINDOW *infos, WINDOW* map) {
         this->player.useAKey();
         for(int i = 0; i < this->itemsOnCurrentMap.size(); ++i) {
           if(destination.compare(std::get<1>(this->itemsOnCurrentMap.at(i)))) {
-            this->player.getInventory()->addItem(std::get<0>(this->itemsOnCurrentMap.at(i)).getItemInside());
-            wprintw(infos, "You unlocked the chest with one of your keys and found %s ! \n", std::get<0>(this->itemsOnCurrentMap.at(i)).getItemInside().getName().data());
+            this->player.getInventory()->addItem(*std::get<0>(this->itemsOnCurrentMap.at(i)).getItemInside());
+            wprintw(infos, "You unlocked the chest with one of your keys and found %s ! \n", std::get<0>(this->itemsOnCurrentMap.at(i)).getItemInside()->getName().data());
             wrefresh(infos);
             this->itemsOnCurrentMap.erase(this->itemsOnCurrentMap.begin() + i);
           }
@@ -449,8 +547,8 @@ bool Game::waitForInput(WINDOW *infos, WINDOW* map) {
     } else if(getSymbolOfChestOnPosition(destination) == unlockedChest) {
       for(int i = 0; i < this->itemsOnCurrentMap.size(); ++i) {
         if(std::get<1>(this->itemsOnCurrentMap.at(i)).compare(destination)) {
-          this->player.getInventory()->addItem(std::get<0>(this->itemsOnCurrentMap.at(i)).getItemInside());
-          wprintw(infos, "You opened the unlocked chest with one of your keys and found %s ! \n", std::get<0>(this->itemsOnCurrentMap.at(i)).getItemInside().getName().data());
+          this->player.getInventory()->addItem(*std::get<0>(this->itemsOnCurrentMap.at(i)).getItemInside());
+          wprintw(infos, "You opened the unlocked chest with one of your keys and found %s ! \n", std::get<0>(this->itemsOnCurrentMap.at(i)).getItemInside()->getName().data());
           wrefresh(infos);
           this->itemsOnCurrentMap.erase(this->itemsOnCurrentMap.begin() + i);
         }
@@ -496,6 +594,36 @@ void Game::updateVision() {
   }
 }
 
-void Game::displayInventory() {
 
+void Game::enemiesMoves(WINDOW* infos) {
+  for(int i = 0; i < this->enemiesOnCurrentMap.size(); i++) {
+    this->enemiesOnCurrentMap.at(i)->setPosition(this->enemiesOnCurrentMap.at(i)->move(&this->player, &this->currentMap, this->enemiesOnCurrentMap, infos));
+
+    if(this->enemiesOnCurrentMap.at(i)->getHealth() <= 0) {
+      if(this->enemiesOnCurrentMap.at(i)->leaveLootBehind()) {
+        this->itemsOnCurrentMap.push_back(std::make_tuple(Chest(this->possibleLoot()), this->enemiesOnCurrentMap.at(i)->getPosition())); // TODO:
+      }
+      this->enemiesOnCurrentMap.erase(this->enemiesOnCurrentMap.begin() + i);
+    }
+  }
+
+}
+
+Item* Game::possibleLoot() {
+
+  Item* toReturn;
+  int r = rand()%(totalObjectsAvailable);
+  switch(r) {
+    case 0:
+      toReturn = new Key();
+      break;
+    case 1:
+      toReturn = new Sword();
+      break;
+    case 2:
+      toReturn = new Food();
+      break;
+  }
+
+  return toReturn;
 }

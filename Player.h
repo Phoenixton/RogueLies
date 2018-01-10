@@ -45,6 +45,9 @@ public:
   void useItem(Item);
   void equipItem(Item);
 
+  bool displayCharacterFile();
+  void redrawCharacFile(WINDOW*);
+
   int calculateMaxHealth();
   int calculateCurrentAttack();
   int calculateCurrentDefense();
@@ -135,20 +138,24 @@ public:
   void setXpPoints(int x) {
     this->xpPoints = x;
   }
-  bool getHasHeadGear() {
-    return this->hasHeadGear;
-  }
-
-  bool getHasTorsoGear() {
-    return this->hasTorsoGear;
-  }
-
   Item getHead() {
     return this->head;
   }
 
   Item getTorso() {
     return this->torso;
+  }
+
+  Item getLeftHand() {
+    return this->leftHand;
+  }
+
+  Item getRightHand() {
+    return this->rightHand;
+  }
+
+  Item getFeet() {
+    return this->feet;
   }
 
   void setHead(Item i) {
@@ -159,12 +166,57 @@ public:
     this->torso = i;
   }
 
+  void setLeftHand(Item i) {
+    this->leftHand = i;
+  }
+
+  void setRightHand(Item i) {
+    this->rightHand = i;
+  }
+
+  void setFeet(Item i) {
+    this->feet = i;
+  }
+
+
+  bool getHasHeadGear() {
+    return this->hasHeadGear;
+  }
+
+  bool getHasTorsoGear() {
+    return this->hasTorsoGear;
+  }
+
+  bool getHasLeftHandGear() {
+    return this->hasLeftHandGear;
+  }
+
+  bool getHasRightHandGear() {
+    return this->hasRightHandGear;
+  }
+
+  bool getHasFeetGear() {
+    return this->hasFeetGear;
+  }
+
   void setHasHeadGear(bool b) {
     this->hasHeadGear = b;
   }
 
   void setHasTorsoGear(bool b) {
     this->hasTorsoGear = b;
+  }
+
+  void setHasLeftHandGear(bool b) {
+    this->hasLeftHandGear = b;
+  }
+
+  void setHasRightHandGear(bool b) {
+    this->hasRightHandGear = b;
+  }
+
+  void setHasFeetGear(bool b) {
+    this->hasFeetGear = b;
   }
 
 //variables

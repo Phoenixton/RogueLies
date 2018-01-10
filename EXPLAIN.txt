@@ -1,3 +1,15 @@
+//SHUFFLE POSITION RETOUR Map
+//LOot mort
+ecran fin si mort
+ecran victoire
+//remettre la pool de monstre + dire combien de monstre il y a/on veut
+//PAGE DE CHARAC K
+AUTRES OBJETS + REFAIREOBJETS
+ATTAQUE DU PLAYER QUAND DEPLACEMENT Du PLAYER
+
+
+
+
 Si c'est le premier niveau : stairsUp ne fait rien
 si c'est le dernier niveau : stairsDown déclenche là fin du jeu
 Si c'est la premiere fois que tu visites le niveau : pushback à la find
@@ -45,7 +57,11 @@ if(stairs == stairsUp) {
   }
 }
 
-
+CHNAGED ITEM->ITEM* in CHest
+505
+  this->player.getInventory()->addItem(*std::get<0>(this->itemsOnCurrentMap.at(i)).getItemInside());
+Change . to ->Game 519
+Changed line 20 Chest ajout *
 
 
   //resize
